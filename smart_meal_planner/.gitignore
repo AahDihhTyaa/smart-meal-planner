@@ -1,0 +1,22 @@
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Streamlit
+.streamlit/
+
+# Temporary python scripts created by the AI
+append_*.py
+add_*.py
+fix_*.py
+refactor_*.py
+restore_*.py
+write_*.py
+diag.py
+original_*.txt
+kitcheniq*
