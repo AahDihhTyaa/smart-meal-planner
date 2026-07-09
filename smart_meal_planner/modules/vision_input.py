@@ -35,6 +35,7 @@ INSTRUCTIONS:
 - For packaged goods: use the product type (e.g. "coconut milk" not "can")
 - Estimate quantities from visual count or package size
 - Include spices, condiments, sauces, oils if visible
+- CRITICAL: Do NOT stop early. Many images contain 12-20+ distinct ingredients. You MUST list EVERY single distinct food item you can find.
 
 Return ONLY a valid JSON array with no markdown, no explanation, no extra text.
 Format exactly:
@@ -508,8 +509,8 @@ class VisionInputModule:
                     return None, "All Gemini models exhausted."
 
             # Parse the JSON object
-            raw_text = re.sub(r"```(?:json)?\\s*", "", raw_text).strip()
-            raw_text = re.sub(r"```\\s*$", "", raw_text).strip()
+            raw_text = re.sub(r"```(?:json)?\s*", "", raw_text).strip()
+            raw_text = re.sub(r"```\s*$", "", raw_text).strip()
             # Extract JSON object
             obj_match = re.search(r'\{.*\}', raw_text, re.DOTALL)
             if obj_match:

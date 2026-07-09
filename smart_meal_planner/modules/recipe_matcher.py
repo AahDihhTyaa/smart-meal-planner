@@ -87,7 +87,7 @@ class RecipeMatcher:
         df["ingredients"] = df["ingredients"].str.lower().str.replace(r"\s+", "_", regex=True)
         df["tags"] = df["tags"].fillna("").str.lower()
         df["ingredient_list"] = df["ingredients"].apply(
-            lambda s: set([i.strip() for i in s.split("|") if i.strip()])
+            lambda s: sorted([i.strip() for i in s.split("|") if i.strip()])
         )
         self._df = df
         
@@ -345,12 +345,12 @@ class RecipeMatcher:
         result["missing_ingredients"] = missing_ings_f
         result["is_indian"]           = is_indian
 
-        # ── Sort: 0 missing FIRST, then is_indian DESC (if focus on), then coverage DESC, then final_score DESC
+        # ── Sort: is_indian DESC (if focus on), then 0 missing FIRST, then coverage DESC, then final_score DESC
         sort_keys = ["missing_count", "coverage", "final_score"]
         sort_ascending = [True, False, False]
         if indian_focus:
-            sort_keys.insert(1, "is_indian")
-            sort_ascending.insert(1, False)
+            sort_keys.insert(0, "is_indian")
+            sort_ascending.insert(0, False)
 
         result = (
             result
@@ -478,8 +478,8 @@ class RecipeMatcher:
         sort_keys = ["leftover_coverage", "coverage", "final_score"]
         sort_ascending = [False, False, False]
         if indian_focus:
-            sort_keys.insert(1, "is_indian")
-            sort_ascending.insert(1, False)
+            sort_keys.insert(0, "is_indian")
+            sort_ascending.insert(0, False)
 
         return (
             df_f

@@ -104,8 +104,19 @@ class TestMatch:
         m = get_matcher()
         result = m.match(["egg", "bread", "butter", "milk"])
         if len(result) > 1:
-            scores = result["final_score"].tolist()
-            assert scores == sorted(scores, reverse=True)
+            # Results are sorted by (missing_count ASC, coverage DESC, final_score DESC)
+            for i in range(len(result) - 1):
+                curr = result.iloc[i]
+                nxt = result.iloc[i + 1]
+                # missing_count should be non-decreasing
+                assert curr["missing_count"] <= nxt["missing_count"], (
+                    f"Row {i}: missing_count {curr['missing_count']} > {nxt['missing_count']}"
+                )
+                # If same missing_count, coverage should be non-increasing
+                if curr["missing_count"] == nxt["missing_count"]:
+                    assert curr["coverage"] >= nxt["coverage"] - 1e-9, (
+                        f"Row {i}: coverage {curr['coverage']} < {nxt['coverage']}"
+                    )
 
     def test_missing_ingredients_column(self):
         m = get_matcher()

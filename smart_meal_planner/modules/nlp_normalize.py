@@ -74,7 +74,7 @@ _STOPWORDS = frozenset(
         "loosely", "packed", "heaped", "level", "sifted", "roasted", "toasted",
         "blanched", "steamed", "boiled", "fried", "baked", "grilled", "smoked",
         "canned", "tinned", "jarred", "bottled", "organic", "free", "range",
-        "low", "fat", "full", "reduced", "unsweetened", "sweetened",
+        "unsweetened", "sweetened",
     ]
 )
 

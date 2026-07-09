@@ -2,39 +2,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
 
 /* ==========================================================================
-   AURELIA "ULTRA" THEME - The Pinnacle of Streamlit UI
-   Warm Gold & Deep Navy | Complex Glassmorphism | Fluid Animations
+   CYBER COBALT & DEEP SLATE THEME - Professional & Impressive
    ========================================================================== */
 
 :root {
     /* ── Core Palette ── */
-    --bg-primary: #0a0c10;
-    --bg-secondary: #12151c;
-    --bg-tertiary: #1a1e28;
+    --bg-primary: #0b0f19;
+    --bg-secondary: #111827;
+    --bg-tertiary: #1f2937;
     
-    /* ── Aurelia Gold Accents ── */
-    --accent-primary: #d4a853;
-    --accent-secondary: #c4943e;
-    --accent-tertiary: #e8c677;
-    --accent-glow: rgba(212, 168, 83, 0.4);
+    /* ── Professional Cobalt Accents ── */
+    --accent-primary: #0ea5e9;
+    --accent-secondary: #0284c7;
+    --accent-tertiary: #38bdf8;
+    --accent-glow: rgba(14, 165, 233, 0.4);
     
     /* ── Semantic Colors ── */
-    --success: #4ade80;
-    --error: #f87171;
-    --warning: #fbbf24;
-    --info: #60a5fa;
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
     
     /* ── Text Colors ── */
-    --text-primary: #F5F1E8;
-    --text-secondary: #a1a8b8;
-    --text-muted: #646b7a;
-    --text-inverse: #0a0c10;
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-muted: #6b7280;
+    --text-inverse: #0b0f19;
     
     /* ── Glassmorphism & Cards ── */
-    --glass-bg: rgba(18, 21, 28, 0.65);
-    --glass-hover: rgba(26, 30, 40, 0.85);
-    --glass-border: rgba(212, 168, 83, 0.12);
-    --glass-border-hover: rgba(212, 168, 83, 0.3);
+    --glass-bg: rgba(17, 24, 39, 0.65);
+    --glass-hover: rgba(31, 41, 55, 0.85);
+    --glass-border: rgba(14, 165, 233, 0.15);
+    --glass-border-hover: rgba(14, 165, 233, 0.35);
     
     /* ── Shadows & Depth ── */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
@@ -60,9 +59,9 @@
    1. GLOBAL RESETS & FOUNDATION
    ========================================================================== */
 
-html, body, [class*="css"], .stApp {
+html, body, [class*="css"], .stApp, [data-testid="stAppViewContainer"], .main {
     font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
-    background: var(--bg-primary) !important;
+    background: transparent !important;
     color: var(--text-primary) !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -75,13 +74,50 @@ html, body, [class*="css"], .stApp {
 }
 
 /* Hide Default Streamlit Clutter */
-header[data-testid="stHeader"], 
 [data-testid="stToolbar"], 
-footer, 
-[data-testid="stSidebar"], 
-[data-testid="collapsedControl"] {
+footer {
     display: none !important;
 }
+
+header[data-testid="stHeader"] {
+    background: transparent !important;
+}
+
+/* ── Sidebar Customization ── */
+[data-testid="stSidebar"] {
+    background: rgba(17, 24, 39, 0.7) !important;
+    backdrop-filter: blur(15px);
+    border-right: 1px solid var(--glass-border) !important;
+    padding-top: 2rem !important;
+}
+[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label {
+    background: transparent;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-md);
+    transition: var(--trans-normal);
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label:hover {
+    background: rgba(14, 165, 233, 0.05);
+    color: var(--text-primary) !important;
+    border-color: var(--glass-border);
+}
+[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label[data-checked="true"],
+[data-testid="stSidebar"] .stRadio > div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+/* Keep standard radio circle for now to ensure visibility */
 
 /* Container Constraints */
 .main .block-container {
@@ -205,7 +241,7 @@ p, span, li, div {
     letter-spacing: 0.05em !important;
     text-transform: uppercase !important;
     padding: 0.75rem 1.5rem !important;
-    box-shadow: 0 4px 15px rgba(212, 168, 83, 0.3) !important;
+    box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3) !important;
     transition: var(--trans-bouncy) !important;
     position: relative;
     overflow: hidden;
@@ -213,7 +249,7 @@ p, span, li, div {
 
 [data-testid="baseButton-primary"]:hover {
     transform: translateY(-2px) scale(1.02) !important;
-    box-shadow: 0 8px 25px rgba(212, 168, 83, 0.4) !important;
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.4) !important;
 }
 
 [data-testid="baseButton-primary"]:active {
@@ -276,7 +312,7 @@ p, span, li, div {
 
 [data-testid="stTabs"] [data-baseweb="tab"]:hover {
     color: var(--text-primary) !important;
-    background: rgba(212, 168, 83, 0.05) !important;
+    background: rgba(14, 165, 233, 0.05) !important;
 }
 
 [data-testid="stTabs"] [aria-selected="true"] {
@@ -357,7 +393,7 @@ p, span, li, div {
 }
 .confidence-ring-container:hover {
     border-color: var(--glass-border-hover);
-    box-shadow: var(--shadow-lg), 0 0 30px rgba(212, 168, 83, 0.05);
+    box-shadow: var(--shadow-lg), 0 0 30px rgba(14, 165, 233, 0.05);
 }
 
 .confidence-ring {
@@ -457,11 +493,11 @@ p, span, li, div {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(212, 168, 83, 0.1);
+    border-bottom: 1px solid rgba(14, 165, 233, 0.1);
     transition: var(--trans-normal);
 }
 .unlock-item:hover {
-    background: rgba(212, 168, 83, 0.02);
+    background: rgba(14, 165, 233, 0.02);
     padding-left: 0.5rem;
 }
 
@@ -524,7 +560,7 @@ p, span, li, div {
 }
 .nutrition-pill:hover {
     border-color: var(--accent-primary);
-    background: rgba(212, 168, 83, 0.05);
+    background: rgba(14, 165, 233, 0.05);
 }
 
 /* ── Chat Interface ── */
@@ -565,8 +601,8 @@ p, span, li, div {
 
 @keyframes pulse-glow {
     0% { box-shadow: 0 0 0 0 var(--accent-glow); }
-    70% { box-shadow: 0 0 0 10px rgba(212, 168, 83, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0); }
+    70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
 }
 
 /* ==========================================================================
@@ -601,7 +637,7 @@ p, span, li, div {
         display: none !important;
     }
     [data-testid="stTabs"] [aria-selected="true"] {
-        background: rgba(212, 168, 83, 0.1) !important;
+        background: rgba(14, 165, 233, 0.1) !important;
     }
 }
 
@@ -609,15 +645,20 @@ p, span, li, div {
 .skeleton-loader-container {
     background: var(--glass-bg);
     border: 1px solid var(--accent-primary);
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-glow);
-    /* backdrop-filter removed for 540Hz scroll performance */
+    padding: 3rem;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg), 0 0 50px rgba(14, 165, 233, 0.15);
+    backdrop-filter: blur(12px);
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
     margin: 2rem 0;
-    animation: fade-in-up 0.5s ease-out forwards;
+    animation: bounce-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes bounce-in {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .skeleton-icon-wrapper {
@@ -647,10 +688,10 @@ p, span, li, div {
 .skeleton-title {
     height: 1.5rem;
     width: 60%;
-    background: rgba(212, 168, 83, 0.2);
+    background: rgba(14, 165, 233, 0.2);
     border-radius: 4px;
     animation: shimmer 2s infinite linear;
-    background-image: linear-gradient(90deg, rgba(212, 168, 83, 0.1) 0%, rgba(212, 168, 83, 0.3) 50%, rgba(212, 168, 83, 0.1) 100%);
+    background-image: linear-gradient(90deg, rgba(14, 165, 233, 0.1) 0%, rgba(14, 165, 233, 0.3) 50%, rgba(14, 165, 233, 0.1) 100%);
     background-size: 400% 100%;
 }
 
@@ -697,10 +738,10 @@ p, span, li, div {
 .fullscreen-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(10, 15, 30, 0.7);
-    /* backdrop-filter removed for 540Hz scroll performance */
+    background: rgba(10, 15, 30, 0.85);
+    backdrop-filter: blur(6px);
     z-index: 9998;
-    animation: fade-in 0.3s ease-out forwards;
+    animation: fade-in 0.4s ease-out forwards;
 }
 
 .fullscreen-centered {
@@ -744,9 +785,9 @@ button[data-testid="baseButton-primary"] {
 }
 
 @keyframes subtlePulse {
-    0% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0.4); }
-    70% { box-shadow: 0 0 0 8px rgba(212, 168, 83, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(212, 168, 83, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
 }
 
 /* ── Enforce Butter-Smooth Scrolling ── */
@@ -766,9 +807,9 @@ html, body, .stApp, [data-testid="stAppViewContainer"], .main {
 .chip {
     display: inline-flex;
     align-items: center;
-    background: rgba(212, 168, 83, 0.15);
+    background: rgba(14, 165, 233, 0.15);
     color: var(--accent-gold);
-    border: 1px solid rgba(212, 168, 83, 0.3);
+    border: 1px solid rgba(14, 165, 233, 0.3);
     padding: 0.35rem 0.8rem;
     border-radius: 99px;
     font-size: 0.85rem;
@@ -778,7 +819,345 @@ html, body, .stApp, [data-testid="stAppViewContainer"], .main {
 }
 
 .chip:hover {
-    background: rgba(212, 168, 83, 0.25);
+    background: rgba(14, 165, 233, 0.25);
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(212, 168, 83, 0.15);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+/* ── Vertical Tabs Conversion ── */
+div[data-testid="stTabs"] {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+div[data-testid="stTabs"] > div:first-child {
+    flex-direction: column !important;
+    min-width: 250px;
+    border-bottom: none !important;
+    border-right: 1px solid var(--glass-border);
+    padding-right: 1rem;
+    gap: 0.5rem;
+}
+div[data-testid="stTabs"] > div:first-child button {
+    text-align: left;
+    justify-content: flex-start;
+    border-bottom: none !important;
+    border-left: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    transition: var(--trans-normal);
+}
+div[data-testid="stTabs"] > div:first-child button:hover {
+    background: rgba(14, 165, 233, 0.05);
+}
+div[data-testid="stTabs"] > div:first-child button[aria-selected="true"] {
+    border-left-color: var(--accent-primary) !important;
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: var(--accent-primary) !important;
+}
+div[data-testid="stTabContent"] {
+    flex: 1;
+    width: 100%;
+}
+
+/* ── Navigation Menu Radio Styles ── */
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label {
+    background: transparent;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-md);
+    transition: var(--trans-normal);
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label:hover {
+    background: rgba(14, 165, 233, 0.05);
+    color: var(--text-primary) !important;
+    border-color: var(--glass-border);
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label[data-checked="true"],
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+/* Hide the actual radio circle */
+[data-testid="stVerticalBlock"] .stRadio input[type="radio"] {
+    display: none !important;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label > div:first-child {
+    display: none !important;
+}
+
+/* ── Weekly Plan Styles ── */
+.day-header {
+    background: var(--bg-secondary);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    border: 1px solid var(--glass-border);
+    border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+    font-weight: 600;
+    margin-top: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.week-cell {
+    background: var(--bg-primary);
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    transition: var(--trans-fast);
+}
+.week-cell:last-child {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-bottom: 1rem;
+}
+.week-cell:hover {
+    background: rgba(14, 165, 233, 0.05);
+    100% { background-position: -100% 0; }
+}
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Fullscreen Loader Overlay ── */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 30, 0.85);
+    backdrop-filter: blur(6px);
+    z-index: 9998;
+    animation: fade-in 0.4s ease-out forwards;
+}
+
+.fullscreen-centered {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    width: 450px !important;
+    max-width: 90vw !important;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ── Global Page & Tab Transitions ── */
+.stApp {
+    animation: fadeInPage 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fadeInPage {
+    0% { opacity: 0; transform: translateY(15px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+div[data-testid="stTabs"] > div[role="tabpanel"] {
+    animation: slideInTab 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideInTab {
+    0% { opacity: 0; transform: translateX(10px); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Add a subtle pulse to all primary buttons to make them look alive */
+button[data-testid="baseButton-primary"] {
+    animation: subtlePulse 3s infinite;
+}
+
+@keyframes subtlePulse {
+    0% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.4); }
+    70% { box-shadow: 0 0 0 8px rgba(14, 165, 233, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+}
+
+/* ── Enforce Butter-Smooth Scrolling ── */
+html, body, .stApp, [data-testid="stAppViewContainer"], .main {
+    /* scroll-behavior removed to fix manual mouse lag */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ── Ingredient Chips ── */
+.chip-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(14, 165, 233, 0.15);
+    color: var(--accent-gold);
+    border: 1px solid rgba(14, 165, 233, 0.3);
+    padding: 0.35rem 0.8rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    transition: var(--trans-normal);
+}
+
+.chip:hover {
+    background: rgba(14, 165, 233, 0.25);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+
+/* ── Vertical Tabs Conversion ── */
+div[data-testid="stTabs"] {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+}
+div[data-testid="stTabs"] > div:first-child {
+    flex-direction: column !important;
+    min-width: 250px;
+    border-bottom: none !important;
+    border-right: 1px solid var(--glass-border);
+    padding-right: 1rem;
+    gap: 0.5rem;
+}
+div[data-testid="stTabs"] > div:first-child button {
+    text-align: left;
+    justify-content: flex-start;
+    border-bottom: none !important;
+    border-left: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    transition: var(--trans-normal);
+}
+div[data-testid="stTabs"] > div:first-child button:hover {
+    background: rgba(14, 165, 233, 0.05);
+}
+div[data-testid="stTabs"] > div:first-child button[aria-selected="true"] {
+    border-left-color: var(--accent-primary) !important;
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: var(--accent-primary) !important;
+}
+div[data-testid="stTabContent"] {
+    flex: 1;
+    width: 100%;
+}
+
+/* ── Navigation Menu Radio Styles ── */
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label {
+    background: transparent;
+    padding: 1rem 1.2rem;
+    border-radius: var(--radius-md);
+    transition: var(--trans-normal);
+    color: var(--text-secondary) !important;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label:hover {
+    background: rgba(14, 165, 233, 0.05);
+    color: var(--text-primary) !important;
+    border-color: var(--glass-border);
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label[data-checked="true"],
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label:has(input:checked) {
+    background: rgba(14, 165, 233, 0.15) !important;
+    color: var(--accent-primary) !important;
+    border-color: var(--accent-primary) !important;
+    box-shadow: 0 4px 15px var(--accent-glow);
+}
+/* Hide the actual radio circle */
+[data-testid="stVerticalBlock"] .stRadio input[type="radio"] {
+    display: none !important;
+}
+[data-testid="stVerticalBlock"] .stRadio > div[role="radiogroup"] > label > div:first-child {
+    display: none !important;
+}
+
+/* ── Weekly Plan Styles ── */
+.day-header {
+    background: var(--bg-secondary);
+    padding: 0.8rem 1.2rem;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    border: 1px solid var(--glass-border);
+    border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+    font-weight: 600;
+    margin-top: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.week-cell {
+    background: var(--bg-primary);
+    padding: 1rem 1.2rem;
+    border: 1px solid var(--glass-border);
+    border-top: none;
+    transition: var(--trans-fast);
+}
+.week-cell:last-child {
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    margin-bottom: 1rem;
+}
+.week-cell:hover {
+    background: rgba(14, 165, 233, 0.05);
+}
+.week-cell-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+}
+.week-cell-cal {
+    font-size: 0.85rem;
+    color: var(--accent-primary);
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   9. DYNAMIC ANIMATED BACKGROUND & PREMIUM DESIGN
+   ========================================================================== */
+
+body, .stApp, [data-testid="stAppViewContainer"], .main {
+    background: linear-gradient(-45deg, #0b0f19, #0f172a, #1e1b4b, #0b0f19) !important;
+    background-size: 400% 400% !important;
+    animation: gradientBG 15s ease infinite !important;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Glassmorphism & Hover Animations */
+.recipe-card, .hero-banner, .confidence-ring-container, .kitchen-tips-card, [data-testid="stChatMessage"], [data-testid="stChatInput"] {
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    background: rgba(17, 24, 39, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+.recipe-card:hover, .kitchen-tips-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    background: rgba(17, 24, 39, 0.75) !important;
+    border-color: rgba(14, 165, 233, 0.5) !important;
+    box-shadow: 0 15px 45px 0 rgba(14, 165, 233, 0.15) !important;
 }

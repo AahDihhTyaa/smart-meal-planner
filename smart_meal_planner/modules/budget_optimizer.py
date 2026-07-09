@@ -95,10 +95,16 @@ class BudgetOptimizer:
         name = ingredient.lower().strip()
         if name in _INGREDIENT_COSTS:
             return _INGREDIENT_COSTS[name]
-        # Try partial match
+        # Try partial match — prefer longest matching key to avoid false positives
+        best_match = None
+        best_len = 0
         for key, cost in _INGREDIENT_COSTS.items():
             if key in name or name in key:
-                return cost
+                if len(key) > best_len:
+                    best_match = cost
+                    best_len = len(key)
+        if best_match is not None:
+            return best_match
         return _CATEGORY_COSTS["pantry"]  # unknown → assume pantry
 
     def recipe_cost(self, recipe: pd.Series) -> float:

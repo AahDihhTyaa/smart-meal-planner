@@ -12,3 +12,6 @@ matplotlib>=3.8.0
 plotly>=5.20.0
 numpy>=1.26.0
 openai>=1.0.0
+SpeechRecognition>=3.10.0
+pydub>=0.25.0
+Flask>=3.0.0

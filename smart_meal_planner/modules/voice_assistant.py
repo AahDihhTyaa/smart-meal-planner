@@ -69,8 +69,12 @@ def transcribe_audio(audio_bytes: bytes, language_code: str = "en-IN") -> Tuple[
             audio_seg.export(wav_io, format="wav")
             wav_io.seek(0)
             audio_bytes = wav_io.read()
-        except Exception:
-            pass  # Try raw bytes anyway
+        except Exception as conv_err:
+            logger.warning(
+                "Audio conversion failed (ffmpeg may not be installed): %s. "
+                "Install ffmpeg: https://ffmpeg.org/download.html", conv_err
+            )
+            # Try raw bytes anyway — may work if already WAV
 
         r = sr.Recognizer()
         r.energy_threshold = 300
@@ -445,8 +449,8 @@ def get_read_aloud_button_html(text: str, lang_code: str = "en-IN", rate: float 
     align-items: center;
     justify-content: center;
     gap: 8px;
-    background: rgba(212, 168, 83, 0.08);
-    border: 1px solid rgba(212, 168, 83, 0.20);
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.20);
     color: #F5F1E8;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 0.85rem;
@@ -462,8 +466,8 @@ def get_read_aloud_button_html(text: str, lang_code: str = "en-IN", rate: float 
     outline: none;
   }}
   .read-aloud-btn:hover {{
-    background: rgba(212, 168, 83, 0.16);
-    border-color: rgba(212, 168, 83, 0.35);
+    background: rgba(14, 165, 233, 0.16);
+    border-color: rgba(14, 165, 233, 0.35);
     transform: translateY(-1px);
   }}
   .read-aloud-btn:active {{

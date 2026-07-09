@@ -41,6 +41,15 @@ class NutritionModule:
 
     # ── Public API ─────────────────────────────────────────────────────────────
 
+    def get_nutrition(self, text: str) -> Dict[str, float]:
+        """Estimate nutrition by parsing ingredient text and lookup."""
+        from .nlp_normalize import NLPNormalizer
+        normalizer = NLPNormalizer()
+        ingredients = list(normalizer.get_ingredient_set(text))
+        if not ingredients and text:
+            ingredients = [i.strip() for i in text.split(',') if i.strip()]
+        return self._estimate_from_ingredients(ingredients)
+
     def get_recipe_nutrition(self, recipe: pd.Series) -> Dict[str, float]:
         """
         Return nutrition dict for a recipe row.

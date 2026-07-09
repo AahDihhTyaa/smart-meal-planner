@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Meal Planner — AI Bento Kitchen</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fraunces (Editorial Serif), Inter (Clean Sans), JetBrains Mono (Technical Monospace) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Liquid Glass Variables */
+            --bg-color: #050510;
+            --liquid-1: #3b82f6; /* Blue */
+            --liquid-2: #8b5cf6; /* Purple */
+            --liquid-3: #ec4899; /* Pink */
+            --text-light: #f8fafc;
+            
+            /* Glassmorphism system */
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-border-hover: rgba(255, 255, 255, 0.3);
+            --glass-blur: 40px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            /* Subtle mesh overlay */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(59, 130, 246, 0.15) 0px, transparent 50%);
+        }
+
+        /* 3D Fluid Animated Background Blobs (The "Liquid" part) */
+        .liquid-blob {
+            position: absolute;
+            border-radius: 50%;
+            z-index: -10;
+            opacity: 0.5;
+            animation: liquid-flow 25s infinite alternate linear;
+            will-change: transform; /* Hardware accelerated */
+            pointer-events: none;
+        }
+        .liquid-blob-1 {
+            width: 800px;
+            height: 800px;
+            /* Performant soft edge using radial gradient instead of filter: blur */
+            background: radial-gradient(circle at center, rgba(59, 130, 246, 0.4) 0%, rgba(59, 130, 246, 0) 70%);
+            top: -10%;
+            left: -10%;
+            animation-duration: 28s;
+        }
+        .liquid-blob-2 {
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle at center, rgba(139, 92, 246, 0.4) 0%, rgba(139, 92, 246, 0) 70%);
+            bottom: -5%;
+            right: -5%;
+            animation-duration: 22s;
+            animation-delay: -5s;
+        }
+        .liquid-blob-3 {
+            width: 900px;
+            height: 900px;
+            background: radial-gradient(circle at center, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0) 70%);
+            top: 40%;
+            left: 30%;
+            transform: translate(-50%, -50%);
+            animation-duration: 35s;
+            animation-delay: -12s;
+        }
+        
+        @keyframes liquid-flow {
+            0% { 
+                transform: translate(0, 0) rotate(0deg) scale(1); 
+            }
+            33% { 
+                transform: translate(100px, 50px) rotate(120deg) scale(1.1); 
+            }
+            66% { 
+                transform: translate(-50px, 150px) rotate(240deg) scale(0.9); 
+            }
+            100% { 
+                transform: translate(0, 0) rotate(360deg) scale(1); 
+            }
+        }
+
+        /* Glassmorphism Card (The "Glass" part) */
+        .bento-card {
+            background: rgba(30, 40, 50, 0.8); /* Solid semi-transparent background to replace blur */
+            border: 1px solid var(--glass-border);
+            border-top: 1px solid rgba(255, 255, 255, 0.3); /* Specular highlight */
+            border-left: 1px solid rgba(255, 255, 255, 0.2); /* Specular highlight */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+            border-radius: 24px;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            z-index: 10;
+        }
+        
+        /* Inner glow effect for cards */
+        .bento-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .bento-card:hover::before {
+            opacity: 1;
+        }
+
+        .bento-card:hover {
+            transform: translateY(-5px);
+            background: var(--glass-hover);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        
+        /* Content needs to be above the glow */
+        .bento-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Typography */
+        .serif-title {
+            font-family: 'Fraunces', serif;
+            letter-spacing: -0.02em;
+        }
+        
+        /* Vibrant gradients for text */
+        .text-gradient-liquid {
+            background: linear-gradient(135deg, var(--liquid-1), var(--liquid-3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        /* Button Glass Styles */
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* backdrop-filter removed for performance */
+            transition: all 0.3s;
+        }
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+        }
+        
+        .btn-liquid {
+            background: linear-gradient(135deg, var(--liquid-1), var(--liquid-2));
+            border: none;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        .btn-liquid::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255,255,255,0.2);
+            transform: rotate(45deg);
+            opacity: 0;
+            transition: 0.3s;
+        }
+        .btn-liquid:hover {
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+            transform: translateY(-2px);
+        }
+        .btn-liquid:hover::after {
+            left: 100%;
+            transition: 0.6s ease-in-out;
+        }
+
+        /* Inputs Glass */
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* backdrop-filter removed for performance */
+            transition: all 0.3s;
+        }
+        .input-glass:focus {
+            background: rgba(0, 0, 0, 0.4);
+            border-color: var(--liquid-1);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+            outline: none;
+        }
+
+        /* Modal Transition */
+        .modal {
+            transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.4s;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-8 flex flex-col items-center">
+    <!-- background blobs -->
+    <div class="liquid-blob liquid-blob-1"></div>
+    <div class="liquid-blob liquid-blob-2"></div>
+    <div class="liquid-blob liquid-blob-3"></div>
+
+    <div class="w-full max-w-7xl flex flex-col gap-6 h-full min-h-[92vh]">
+        <!-- Top Navigation Header -->
+        <header class="w-full flex items-center justify-between pb-2 mb-4 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <span class="text-3xl drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">🍱</span>
+                <div>
+                    <h1 class="serif-title text-2xl font-bold tracking-tight text-gradient-liquid">Smart Meal Planner</h1>
+                    <p class="text-xs text-white/50 tracking-wider uppercase font-semibold">AI Bento Kitchen Dashboard</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/viz" class="btn-glass px-4 py-2 text-xs font-semibold tracking-wider rounded-lg transition" title="Architecture Visualizer">3D Visualizer 🧭</a>
+                <button onclick="openSettings()" class="btn-glass w-10 h-10 flex items-center justify-center rounded-lg transition" title="Configuration Settings">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Main Bento Grid -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-stretch">
+            
+            <!-- LEFT COLUMN (4 grid units width) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- Module 1: AI Perception Hub -->
+                <section class="bento-card rounded-3xl p-5 flex flex-col gap-4">
+                    <h2 class="serif-title text-lg font-semibold flex items-center gap-2 text-cyan-400">
+                        <span>📸</span> AI Perception Hub
+                    </h2>
+                    
+                    <!-- Drag & Drop container -->
+                    <div id="drop-zone" class="border border-dashed border-white/15 hover:border-cyan-500/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 bg-white/[0.01] hover:bg-cyan-500/[0.02] cursor-pointer transition duration-300">
+                        <span class="text-3xl text-cyan-400/80" id="drop-icon">📤</span>
+                        <p class="text-xs text-center text-white/60" id="drop-text">Drag pantry photo here or <span class="text-cyan-400 underline font-semibold">browse</span></p>
+                        <img id="image-preview" class="hidden max-h-32 rounded-lg border border-white/10 shadow-md">
+                    </div>
+                    <input type="file" id="vision-upload" class="hidden" accept="image/*">
+
+                    <div class="flex gap-3 items-center">
+                        <button id="process-photo-btn" onclick="processPhoto()" class="flex-1 py-3 text-xs tracking-wider font-bold uppercase rounded-xl bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white shadow-lg transition duration-200" disabled>Process Photo 🤖</button>
+                        <button id="mic-toggle-btn" onclick="toggleVoiceInput()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-400 transition hover:scale-105 active:scale-95" title="Speech to Text Command">
+                            <span class="text-lg">🎙️</span>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Module 2: Pantry & NLP Normalizer -->
+                <section class="bento-card rounded-3xl p-5 flex flex-col gap-4 flex-1">
+                    <h2 class="serif-title text-lg font-semibold flex items-center gap-2 text-gradient-liquid">
+                        <span>🥫</span> Pantry & NLP Normalizer
+                    </h2>
+                    
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-white/60 uppercase font-semibold">Add Ingredients (Text / List)</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="raw-ingredients-input" placeholder="e.g. 2 ripe tomatoes, 500g chicken..." class="flex-1 input-glass rounded-xl px-4 py-3 text-sm text-white placeholder-white/40">
+                            <button onclick="addRawIngredients()" class="btn-liquid px-5 py-3 font-semibold text-sm rounded-xl text-white">Add</button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-white/40 uppercase font-semibold">Active Pantry Ingredients</span>
+                            <button onclick="clearPantry()" class="text-xs text-rose-400 hover:text-rose-300 font-medium">Clear All</button>
+                        </div>
+                        <!-- Ingredient tags area -->
+                        <div id="pantry-chips-container" class="flex flex-wrap gap-2 max-h-64 overflow-y-auto p-3 bg-black/20 border border-white/5 rounded-2xl flex-1 items-start content-start">
+                            <div class="text-xs text-white/30 italic m-auto">Pantry is empty. Upload a photo, speak, or type items.</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 input-glass rounded-xl">
+                        <span class="text-xs font-semibold text-white/80">Indian Cuisine Focus</span>
+                        <input type="checkbox" id="indian-focus" class="w-5 h-5 accent-blue-500 rounded cursor-pointer">
+                    </div>
+
+                    <button onclick="generatePlan()" id="generate-plan-btn" class="w-full py-4 btn-liquid font-bold uppercase tracking-wider text-sm rounded-xl text-white">
+                        Generate Meal Plan ✨
+                    </button>
+                </section>
+            </div>
+
+            <!-- CENTER COLUMN: Recipe Matcher & Scheduler (5 grid units width) -->
+            <section class="lg:col-span-5 bento-card rounded-3xl p-5 flex flex-col gap-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/5">
+                    <h2 class="serif-title text-xl font-bold text-amber-400 flex items-center gap-2">
+                        <span>🍽️</span> AI Recipe Matcher
+                    </h2>
+                    
+                    <!-- View modes: Daily vs Weekly -->
+                    <div class="flex bg-black/40 border border-white/10 p-1 rounded-xl self-start sm:self-auto">
+                        <button onclick="switchViewMode('daily')" id="tab-daily" class="px-4 py-1.5 text-xs font-semibold rounded-lg text-white bg-amber-600 transition">Daily</button>
+                        <button onclick="switchViewMode('weekly')" id="tab-weekly" class="px-4 py-1.5 text-xs font-semibold rounded-lg text-white/55 hover:text-white transition">Weekly</button>
+                    </div>
+                </div>
+
+                <!-- Day select tabs (Only visible in Weekly mode) -->
+                <div id="weekly-days-tabs" class="hidden flex gap-1 overflow-x-auto pb-1">
+                    <!-- Dynamic tabs: Monday to Sunday -->
+                </div>
+
+                <!-- Active Schedule meals slots or list -->
+                <div id="recipe-list-container" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
+                    <!-- Dynamic Recipe Cards -->
+                    <div class="m-auto text-center py-12 px-4 flex flex-col items-center gap-3">
+                        <span class="text-5xl animate-bounce">🥗</span>
+                        <h3 class="serif-title text-lg font-semibold text-white/70">Your kitchen is quiet</h3>
+                        <p class="text-xs text-white/40 max-w-xs">Fill up the normalizer on the left and tap "Generate" to unlock optimized custom recipe recommendations.</p>
+                    </div>
+                </div>
+
+                <!-- Chef's Alternative Recommendations -->
+                <div class="mt-4 pt-4 border-t border-white/5 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="serif-title text-xs font-bold tracking-wider uppercase text-amber-500 flex items-center gap-1.5">
+                            <span>✨</span> Chef's Alternative Matches
+                        </h3>
+                        <span class="text-[9px] text-white/30 font-mono uppercase bg-white/5 px-2 py-0.5 rounded">Pool</span>
+                    </div>
+                    <div id="alternative-recipes-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1 content-start">
+                        <div class="col-span-2 text-center text-xs text-white/30 italic py-4">No alternative recommendations loaded. Add ingredients and tap Generate.</div>
+                    </div>
+                </div>
+
+                <!-- Unlockable Recommendations -->
+                <div class="mt-4 pt-4 border-t border-white/5 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <h3 class="serif-title text-xs font-bold tracking-wider uppercase text-cyan-400 flex items-center gap-1.5">
+                            <span>🔓</span> Unlockable Recipes
+                        </h3>
+                        <span class="text-[9px] text-white/30 font-mono uppercase bg-white/5 px-2 py-0.5 rounded">1-3 missing ingredients</span>
+                    </div>
+                    <div id="unlockable-recipes-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-48 overflow-y-auto pr-1 content-start">
+                        <div class="col-span-2 text-center text-xs text-white/30 italic py-4">Add some ingredients to see what you can unlock.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RIGHT COLUMN: Budget & Nutrition Analytics + Chatbot (3 grid units width) -->
+            <div class="lg:col-span-3 flex flex-col gap-6">
+                <!-- Module 4: Budget & Nutrition Analytics -->
+                <section class="bento-card rounded-3xl p-5 flex flex-col gap-4">
+                    <h2 class="serif-title text-lg font-semibold flex items-center gap-2 text-emerald-400">
+                        <span>📊</span> Stats & Analytics
+                    </h2>
+
+                    <!-- Budget Area -->
+                    <div class="flex flex-col gap-2 p-3 bg-black/25 border border-white/5 rounded-xl">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-white/45 font-semibold uppercase">Daily Cost</span>
+                            <span class="text-amber-400 font-bold" id="budget-ratio">$0.00 / $15.00</span>
+                        </div>
+                        <!-- 3D style progress bar -->
+                        <div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div id="budget-progress" class="bg-gradient-to-r from-amber-500 to-amber-600 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <label for="smart-swap-toggle" class="text-[11px] text-white/60 font-semibold cursor-pointer">Enable Cheap Swaps</label>
+                            <input type="checkbox" id="smart-swap-toggle" onchange="toggleSmartSwaps(this)" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+                        </div>
+                    </div>
+
+                    <!-- Macro progress bars -->
+                    <div class="flex flex-col gap-3">
+                        <h3 class="text-xs font-semibold text-white/40 uppercase tracking-wider">Macros Breakdown</h3>
+                        
+                        <!-- Calorie -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-medium">
+                                <span>Calories ⚡</span>
+                                <span id="nutri-cals">0 kcal</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <div id="nutri-cals-bar" class="bg-cyan-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Protein -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-medium">
+                                <span class="text-emerald-400">Protein 🥩</span>
+                                <span id="nutri-protein">0g</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <div id="nutri-protein-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Carbs -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-medium">
+                                <span class="text-amber-400">Carbohydrates 🥖</span>
+                                <span id="nutri-carbs">0g</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <div id="nutri-carbs-bar" class="bg-amber-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fat -->
+                        <div class="flex flex-col gap-1">
+                            <div class="flex justify-between text-xs font-medium">
+                                <span class="text-pink-400">Fat 🧈</span>
+                                <span id="nutri-fat">0g</span>
+                            </div>
+                            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                                <div id="nutri-fat-bar" class="bg-pink-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pipeline unlock details -->
+                    <div id="analytical-insight" class="text-xs text-white/50 border-t border-white/5 pt-3 leading-relaxed">
+                        No active analytics. Try generating a meal plan to inspect pantry coverage grade, batch prep advice, and seasonal swaps.
+                    </div>
+                </section>
+
+                <!-- Module 5: Chatbot Intent Panel -->
+                <section id="chat-terminal" class="bento-card rounded-3xl p-5 flex flex-col gap-3 flex-1 min-h-[300px] border-cyan-500/25">
+                    <div class="flex justify-between items-center pb-2 border-b border-white/5">
+                        <h2 class="serif-title text-md font-bold text-cyan-400 flex items-center gap-1.5">
+                            <span>💬</span> AI Chef terminal
+                        </h2>
+                        <span id="chat-intent" class="text-[9px] font-mono uppercase bg-white/5 px-2 py-0.5 rounded text-white/55 border border-white/10">auto</span>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chat-messages" class="flex-1 overflow-y-auto text-xs space-y-3 flex flex-col pr-1">
+                        <div class="bg-white/5 p-3 rounded-2xl rounded-bl-none text-white/80 self-start max-w-[90%] leading-relaxed">
+                            Bonjour! I am your AI Chef. Type your dietary queries, plan modifications, or custom recipe tips here.
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="flex gap-1.5 items-center mt-2">
+                        <input type="text" id="chat-input" placeholder="Ask AI Chef..." onkeypress="handleChatKey(event)" class="flex-1 bg-black/40 text-xs border border-white/10 rounded-xl px-3 py-2.5 focus:outline-none focus:border-cyan-500/50 transition">
+                        <button onclick="sendChatMessage()" class="w-9 h-9 flex items-center justify-center bg-cyan-600 hover:bg-cyan-500 rounded-xl transition active:scale-95 text-white">➔</button>
+                    </div>
+                </section>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Configuration Modal -->
+    <div id="settings-modal" class="modal fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center opacity-0 invisible">
+        <div class="bento-card rounded-3xl p-6 w-full max-w-md m-4 border-white/10">
+            <div class="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
+                <h3 class="serif-title text-lg font-bold text-white">API Keys Configuration</h3>
+                <button onclick="closeSettings()" class="text-2xl text-white/40 hover:text-white">&times;</button>
+            </div>
+            <div class="space-y-4">
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold text-white/60">Gemini API Key (Vision & Intent)</label>
+                    <input type="password" id="gemini-key" placeholder="AI Studio key..." class="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50">
+                </div>
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold text-white/60">Groq API Key (Optional Whisper Fallback)</label>
+                    <input type="password" id="groq-key" placeholder="gsk_..." class="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50">
+                </div>
+                <button onclick="saveSettings()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 font-bold uppercase text-xs tracking-wider rounded-xl transition active:scale-95 text-white">
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recipe Detail Modal -->
+    <div id="recipe-modal" class="modal fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center opacity-0 invisible">
+        <div class="bento-card rounded-3xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto m-4 border-white/10 bg-[#161a25]/95 text-white flex flex-col gap-4">
+            <div class="flex justify-between items-start pb-4 border-b border-white/5">
+                <div>
+                    <span id="modal-recipe-slot" class="text-[10px] font-bold tracking-wider uppercase bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">Slot</span>
+                    <h3 id="modal-recipe-title" class="serif-title text-2xl font-bold mt-1 text-white">Recipe Title</h3>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="readRecipeText()" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg transition" title="Read Recipe Aloud">🔊</button>
+                    <button onclick="closeRecipeModal()" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-lg text-xl leading-none">&times;</button>
+                </div>
+            </div>
+
+            <!-- Stats/Macros -->
+            <div class="grid grid-cols-4 gap-3">
+                <div class="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
+                    <span class="text-[10px] text-white/40 block font-semibold uppercase">Calories</span>
+                    <strong class="text-sm font-bold text-cyan-400 block mt-1" id="modal-cals">0 kcal</strong>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
+                    <span class="text-[10px] text-white/40 block font-semibold uppercase">Protein</span>
+                    <strong class="text-sm font-bold text-emerald-400 block mt-1" id="modal-protein">0g</strong>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
+                    <span class="text-[10px] text-white/40 block font-semibold uppercase">Carbs</span>
+                    <strong class="text-sm font-bold text-amber-400 block mt-1" id="modal-carbs">0g</strong>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-3 border border-white/5 text-center">
+                    <span class="text-[10px] text-white/40 block font-semibold uppercase">Fat</span>
+                    <strong class="text-sm font-bold text-pink-400 block mt-1" id="modal-fat">0g</strong>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+                <!-- Ingredients -->
+                <div class="flex flex-col gap-2">
+                    <h4 class="serif-title text-md font-bold text-amber-400">Ingredients</h4>
+                    <ul id="modal-ingredients" class="list-disc list-inside text-xs space-y-2 text-white/70 bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex-1 overflow-y-auto">
+                        <!-- Dynamic list -->
+                    </ul>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="flex flex-col gap-2">
+                    <h4 class="serif-title text-md font-bold text-amber-400">Preparation Instructions</h4>
+                    <div id="modal-instructions" class="text-xs leading-relaxed space-y-3 text-white/70 bg-white/[0.02] border border-white/5 p-4 rounded-2xl flex-1 overflow-y-auto max-h-[300px]">
+                        <!-- Dynamic steps -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Swap Action Row for Alternatives -->
+            <div id="modal-swap-actions" class="mt-2 pt-4 border-t border-white/5 flex gap-3 items-center justify-between">
+                <span class="text-[10px] text-white/40 uppercase font-bold tracking-wider">Swap this recipe into today's plan:</span>
+                <div class="flex gap-2">
+                    <button onclick="swapActiveRecipe('breakfast')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-amber-600/10 hover:bg-amber-600/20 text-amber-400 border border-amber-500/25 active:scale-95 transition">Swap Breakfast</button>
+                    <button onclick="swapActiveRecipe('lunch')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-amber-600/10 hover:bg-amber-600/20 text-amber-400 border border-amber-500/25 active:scale-95 transition">Swap Lunch</button>
+                    <button onclick="swapActiveRecipe('dinner')" class="px-4 py-2 text-[10px] font-bold rounded-lg bg-amber-600/10 hover:bg-amber-600/20 text-amber-400 border border-amber-500/25 active:scale-95 transition">Swap Dinner</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loader Screen Overlay -->
+    <div id="loading-overlay" class="fixed inset-0 bg-[#0B0F19]/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 z-[9999] opacity-0 invisible transition-all duration-300">
+        <div class="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+        <p id="loading-message" class="serif-title text-lg text-white/80 font-medium tracking-wide">Cooking up your customized recipe options...</p>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
