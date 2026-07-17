@@ -414,7 +414,7 @@
                     <div class="flex flex-col gap-2 p-3 bg-black/25 border border-white/5 rounded-xl">
                         <div class="flex justify-between items-center text-xs">
                             <span class="text-white/45 font-semibold uppercase">Daily Cost</span>
-                            <span class="text-amber-400 font-bold" id="budget-ratio">$0.00 / $15.00</span>
+                            <span class="text-amber-400 font-bold" id="budget-ratio">₹0 / ₹500</span>
                         </div>
                         <!-- 3D style progress bar -->
                         <div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5 shadow-inner">
@@ -482,7 +482,7 @@
                 </section>
 
                 <!-- Module 5: Chatbot Intent Panel -->
-                <section id="chat-terminal" class="bento-card rounded-3xl p-5 flex flex-col gap-3 flex-1 min-h-[300px] border-cyan-500/25">
+                <section id="chat-terminal" class="bento-card rounded-3xl p-5 flex flex-col gap-3 border-cyan-500/25" style="max-height:480px; min-height:300px;">
                     <div class="flex justify-between items-center pb-2 border-b border-white/5">
                         <h2 class="serif-title text-md font-bold text-cyan-400 flex items-center gap-1.5">
                             <span>💬</span> AI Chef terminal
@@ -491,7 +491,7 @@
                     </div>
 
                     <!-- Chat Messages -->
-                    <div id="chat-messages" class="flex-1 overflow-y-auto text-xs space-y-3 flex flex-col pr-1">
+                    <div id="chat-messages" class="overflow-y-auto text-xs space-y-3 flex flex-col pr-1" style="flex:1; max-height:320px; min-height:120px;">
                         <div class="bg-white/5 p-3 rounded-2xl rounded-bl-none text-white/80 self-start max-w-[90%] leading-relaxed">
                             Bonjour! I am your AI Chef. Type your dietary queries, plan modifications, or custom recipe tips here.
                         </div>

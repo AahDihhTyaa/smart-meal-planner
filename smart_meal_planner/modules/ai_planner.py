@@ -104,14 +104,16 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
   "cuisine": "cuisine type",
   "meal_type": "{meal_type}",
   "ingredients": "ingredient1|ingredient2|ingredient3",
-  "instructions": "Brief cooking instructions in 2-3 sentences.",
+  "instructions": "1. Step one action here. 2. Step two action here. 3. Step three action here. 4. Step four action here. 5. Final plating step.",
   "tags": "tag1,tag2,tag3",
   "calories": 450,
   "protein": 35.0,
   "carbs": 40.0,
-  "fat": 12.0
+  "fat": 12.0,
+  "prep_time_min": 20
 }}
 
+- instructions MUST have at least 4 numbered steps ("1. ...", "2. ...", etc.), each step a clear cooking action.
 - ingredients field MUST be pipe-separated lowercase names (e.g. chicken_breast|garlic|olive_oil).
 - tags field MUST be comma-separated.
 """
@@ -229,15 +231,17 @@ Return ONLY a valid JSON array of {count} objects, with each object having this 
   "cuisine": "cuisine type",
   "meal_type": "any",
   "ingredients": "ingredient1|ingredient2|ingredient3",
-  "instructions": "Brief cooking instructions in 2-3 sentences.",
+  "instructions": "1. Step one action here. 2. Step two action here. 3. Step three action here. 4. Step four action here. 5. Final plating step.",
   "tags": "tag1,tag2",
   "calories": 450,
   "protein": 35.0,
   "carbs": 40.0,
-  "fat": 12.0
+  "fat": 12.0,
+  "prep_time_min": 20
 }}
 
 - Output a JSON Array: [ {{...}}, {{...}} ]
+- instructions MUST have at least 4 numbered steps, each step a clear cooking action.
 - ingredients field MUST be pipe-separated lowercase names.
 """
         try:

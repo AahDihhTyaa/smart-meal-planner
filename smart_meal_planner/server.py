@@ -8,8 +8,9 @@ from pathlib import Path
 # Ensure the project root is on sys.path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, request, jsonify, session, make_response
 from dotenv import load_dotenv
+from flasgger import Swagger
 
 # Load all required modules
 from modules.nlp_normalize import NLPNormalizer
@@ -29,7 +30,29 @@ from modules.ai_planner import AILivePlanner
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-smart-meal-planner-secret-key")
+app.secret_key = os.urandom(24)
+
+# Initialize Swagger API Documentation
+swagger = Swagger(app, template={
+    "info": {
+        "title": "Smart Meal Planner API",
+        "description": "API endpoints for the AI-powered Bento Kitchen meal planner.",
+        "version": "1.0.0"
+    }
+})
+
+# Global JSON Error Handler
+@app.errorhandler(Exception)
+def handle_global_error(error):
+    import traceback
+    print("Unhandled Exception:", traceback.format_exc())
+    return jsonify({
+        "success": False,
+        "error": {
+            "type": type(error).__name__,
+            "message": str(error)
+        }
+    }), 500
 
 # Initialize heavy singletons
 normalizer = NLPNormalizer()
@@ -104,6 +127,34 @@ def serialize_week_plan(week_plan, user_ingredients=None):
 
 @app.route('/api/plan', methods=['POST'])
 def generate_plan():
+    """
+    Generate a meal plan based on provided ingredients.
+    ---
+    tags:
+      - Planner
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            ingredients:
+              type: array
+              items:
+                type: string
+            dietary_filters:
+              type: array
+              items:
+                type: string
+            indian_focus:
+              type: boolean
+    responses:
+      200:
+        description: Meal plan generation successful
+      500:
+        description: Server error
+    """
     try:
         data = request.json
         cache_key = json.dumps(data, sort_keys=True)
@@ -281,22 +332,39 @@ def chat():
 
 
 @app.route('/api/analyze', methods=['POST'])
-def analyze():
-    try:
-        data = request.json
-        ingredients = data.get('ingredients', [])
-        day_plan = data.get('day_plan', {})
-        week_plan = data.get('week_plan', {})
-        
-        analysis = recommendation_engine.get_full_analysis(
-            user_ingredients=ingredients,
-            recipe_df=matcher.corpus,
-            day_plan=day_plan,
-            week_plan=week_plan
-        )
-        return jsonify({'success': True, 'analysis': analysis})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+def analyze_nutrition():
+    """
+    Analyze nutrition and budget for the generated plan.
+    ---
+    tags:
+      - Analytics
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            day_plan:
+              type: object
+            week_plan:
+              type: object
+    responses:
+      200:
+        description: Analytics generation successful
+    """
+    data = request.json or {}
+    ingredients = data.get('ingredients', [])
+    day_plan = data.get('day_plan', {})
+    week_plan = data.get('week_plan', {})
+    
+    analysis = recommendation_engine.get_full_analysis(
+        user_ingredients=ingredients,
+        recipe_df=matcher.corpus,
+        day_plan=day_plan,
+        week_plan=week_plan
+    )
+    return jsonify({'success': True, 'analysis': analysis})
 
 @app.route('/api/nutrition', methods=['POST'])
 def nutrition():
@@ -311,7 +379,37 @@ def nutrition():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/vision', methods=['POST'])
-def vision():
+def process_vision():
+    """
+    Process an image of ingredients to detect items.
+    ---
+    tags:
+      - Vision
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          properties:
+            image:
+              type: string
+              description: Base64 encoded image string starting with data:image/jpeg;base64,
+    responses:
+      200:
+        description: Successful detection
+        schema:
+          type: object
+          properties:
+            success:
+              type: boolean
+            ingredients:
+              type: array
+              items:
+                type: string
+      500:
+        description: Server error
+    """
     try:
         data = request.json
         image_base64 = data.get('image_base64', '')

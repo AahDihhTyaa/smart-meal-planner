@@ -399,6 +399,13 @@ function renderRecipePlan() {
             const dashArray = 125.6;
             const dashOffset = dashArray - (dashArray * coverage / 100);
 
+            // Get a clean first-step preview from numbered instructions
+            const rawInstructions = recipe.instructions || '';
+            const firstStepMatch = rawInstructions.match(/1\.\s*(.+?)(?=\s*2\.|$)/);
+            const instructionPreview = firstStepMatch
+                ? firstStepMatch[1].trim().substring(0, 100) + (firstStepMatch[1].trim().length > 100 ? '…' : '')
+                : rawInstructions.substring(0, 100) + (rawInstructions.length > 100 ? '…' : '');
+            
             card.innerHTML = `
                 <!-- Coverage Circular Ring -->
                 <div class="flex flex-col items-center justify-center shrink-0">
@@ -420,7 +427,7 @@ function renderRecipePlan() {
                 </div>
 
                 <!-- Info -->
-                <div class="flex-1 flex flex-col justify-between">
+                <div class="flex-1 flex flex-col justify-between min-w-0">
                     <div>
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold tracking-wider uppercase text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">${slot}</span>
@@ -432,11 +439,12 @@ function renderRecipePlan() {
                             </div>
                         </div>
                         <h3 class="serif-title text-md font-semibold text-white mt-1.5 leading-snug">${recipe.title}</h3>
-                        <p class="text-xs text-white/60 line-clamp-2 mt-1">${recipe.instructions || ''}</p>
+                        <p class="text-xs text-white/50 mt-1 leading-relaxed">Step 1: ${instructionPreview}</p>
                     </div>
                     
-                    <div class="text-[10px] text-white/40 mt-2 truncate">
-                        <strong>Includes:</strong> ${swappedIngredients.join(', ')}
+                    <div class="flex flex-wrap gap-1 mt-2">
+                        ${swappedIngredients.slice(0, 6).map(ing => `<span class="text-[9px] bg-white/5 border border-white/8 text-white/50 px-1.5 py-0.5 rounded-full">${ing}</span>`).join('')}
+                        ${swappedIngredients.length > 6 ? `<span class="text-[9px] text-white/30 px-1.5 py-0.5">+${swappedIngredients.length - 6} more</span>` : ''}
                     </div>
                 </div>
             `;
@@ -603,35 +611,44 @@ function updateDashboardStats() {
     document.getElementById('nutri-carbs-bar').style.width = `${Math.min(100, (totalCarbs / maxCarbs) * 100)}%`;
     document.getElementById('nutri-fat-bar').style.width = `${Math.min(100, (totalFat / maxFat) * 100)}%`;
 
-    // Budget Costs Calculation
-    const budgetLimit = 15.00;
-    document.getElementById('budget-ratio').textContent = `$${totalCost.toFixed(2)} / $${budgetLimit.toFixed(2)}`;
-    document.getElementById('budget-progress').style.width = `${Math.min(100, (totalCost / budgetLimit) * 100)}%`;
+    // Budget Costs Calculation (Indian Rupees)
+    const budgetLimit = 500; // ₹500/day
+    const totalCostINR = totalCost; // already calculated in INR by getEstimatedRecipeCost
+    document.getElementById('budget-ratio').textContent = `₹${Math.round(totalCostINR)} / ₹${budgetLimit}`;
+    document.getElementById('budget-progress').style.width = `${Math.min(100, (totalCostINR / budgetLimit) * 100)}%`;
 }
 
 function getEstimatedRecipeCost(recipe) {
     const matchedIngredients = Array.isArray(recipe.ingredient_list) ? recipe.ingredient_list : [];
     
-    // Static basic pricing lookup database
+    // Indian market pricing in Rupees (₹) per typical recipe portion
     const prices = {
-        "salmon": 3.50, "tuna": 2.80, "shrimp": 3.20, "beef": 3.00, "lamb": 3.50,
-        "chicken": 2.00, "chicken_breast": 2.20, "tofu": 1.00, "paneer": 1.50,
-        "egg": 0.30, "eggs": 0.30, "milk": 0.25, "cheese": 0.80, "butter": 0.30,
-        "rice": 0.20, "pasta": 0.25, "tomato": 0.40, "onion": 0.20, "garlic": 0.10
+        // Proteins
+        "chicken": 80,  "chicken_breast": 100, "chicken_leg": 70, "egg": 8, "eggs": 8,
+        "paneer": 60,   "tofu": 50,  "fish": 100, "mutton": 200, "beef": 180, "prawn": 150,
+        "tuna": 120,    "shrimp": 140, "lamb": 200, "dal": 20, "lentils": 20, "chana": 25,
+        // Vegetables
+        "onion": 10,    "tomato": 15,  "potato": 12, "spinach": 20, "peas": 18,
+        "broccoli": 40, "capsicum": 30, "carrot": 15, "cauliflower": 30, "cabbage": 20,
+        "mushroom": 50, "corn": 20,    "beans": 20,  "pumpkin": 15, "eggplant": 20,
+        // Dairy & Grains
+        "milk": 10,     "butter": 15,  "cheese": 40, "yogurt": 15, "curd": 15,
+        "rice": 15,     "pasta": 25,   "bread": 20,  "roti": 5,  "flour": 10, "noodles": 25,
+        // Common spices (pantry, minimal cost)
+        "garlic": 5,    "ginger": 5,   "turmeric": 2, "cumin": 2, "coriander": 5,
     };
 
-    let cost = 0.00;
+    let cost = 0;
     matchedIngredients.forEach(ing => {
-        const base = ing.toLowerCase();
-        // Check for active cheap swap
+        const base = ing.toLowerCase().split("_")[0];
         if (currentSwappedIngredients[ing]) {
-            cost += 0.80; // generic cheap alternative cost
+            cost += 30; // generic cheap Indian alternative
         } else {
-            cost += prices[base] || 0.35; // default fallback
+            cost += prices[ing.toLowerCase()] || prices[base] || 20; // ₹20 default fallback
         }
     });
 
-    return cost > 0 ? cost : 2.50; // default recipe base
+    return cost > 0 ? cost : 80; // ₹80 default recipe base
 }
 
 function toggleSmartSwaps(checkbox) {
@@ -728,10 +745,12 @@ function appendMessage(role, text) {
 
     const bubble = document.createElement('div');
     if (role === 'user') {
-        bubble.className = "bg-cyan-600 text-white p-3 rounded-2xl rounded-br-none self-end max-w-[90%] leading-relaxed shadow-md animate-fade-in";
+        bubble.className = "bg-cyan-600 text-white p-3 rounded-2xl rounded-br-none self-end max-w-[90%] leading-relaxed shadow-md animate-fade-in break-words";
+        bubble.style.wordBreak = "break-word";
         bubble.textContent = text;
     } else {
-        bubble.className = "bg-white/5 text-white/80 p-3 rounded-2xl rounded-bl-none self-start max-w-[90%] leading-relaxed border border-white/5 animate-fade-in";
+        bubble.className = "bg-white/5 text-white/80 p-3 rounded-2xl rounded-bl-none self-start max-w-[90%] leading-relaxed border border-white/5 animate-fade-in break-words";
+        bubble.style.wordBreak = "break-word";
         bubble.innerHTML = `
             <div>${text}</div>
             <button onclick="speakText('${text.replace(/'/g, "\\'")}')" class="text-[9px] text-cyan-400 hover:underline mt-1.5 flex items-center gap-1 font-semibold uppercase">🔊 Read Aloud</button>
@@ -799,20 +818,36 @@ function openRecipeModal(recipe, slot) {
         ingContainer.appendChild(li);
     });
 
-    // Instructions mapping
+    // Instructions: parse numbered steps for clean display
     const instContainer = document.getElementById('modal-instructions');
     instContainer.innerHTML = "";
     
-    const steps = (recipe.instructions || "").split(/\d+\.\s+/).filter(s => s.trim().length > 0);
-    if (steps.length > 0) {
+    const rawInstructions = recipe.instructions || "";
+    // Try to split by numbered pattern: "1. ... 2. ... 3. ..."
+    const steps = rawInstructions
+        .split(/(?=\d+\.\s)/)
+        .map(s => s.replace(/^\d+\.\s*/, '').trim())
+        .filter(s => s.length > 5);
+    
+    if (steps.length > 1) {
+        const ol = document.createElement('ol');
+        ol.className = "flex flex-col gap-3";
         steps.forEach((step, idx) => {
-            const p = document.createElement('p');
-            p.className = "mb-2";
-            p.innerHTML = `<strong class="text-amber-500">${idx + 1}.</strong> ${step.trim()}`;
-            instContainer.appendChild(p);
+            const li = document.createElement('li');
+            li.className = "flex gap-3 text-sm text-white/80";
+            li.innerHTML = `
+                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold flex items-center justify-center">${idx + 1}</span>
+                <span>${step}</span>
+            `;
+            ol.appendChild(li);
         });
+        instContainer.appendChild(ol);
     } else {
-        instContainer.textContent = recipe.instructions || "No preparation guidelines listed.";
+        // Fallback: display as plain text
+        const p = document.createElement('p');
+        p.className = "text-sm text-white/70 leading-relaxed";
+        p.textContent = rawInstructions || "No preparation guidelines listed.";
+        instContainer.appendChild(p);
     }
 
     const swapActions = document.getElementById('modal-swap-actions');

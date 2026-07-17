@@ -15,3 +15,5 @@ openai>=1.0.0
 SpeechRecognition>=3.10.0
 pydub>=0.25.0
 Flask>=3.0.0
+flasgger>=0.9.7
+pytest>=8.0.0
