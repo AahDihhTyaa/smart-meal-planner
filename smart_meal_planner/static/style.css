@@ -368,8 +368,8 @@ p, span, li, div {
     align-items: center;
     gap: 2rem;
     box-shadow: var(--shadow-lg);
-    /* backdrop-filter removed for 540Hz scroll performance */
     animation: float 6s ease-in-out infinite;
+    will-change: transform;
 }
 
 .hero-emoji {
@@ -388,8 +388,7 @@ p, span, li, div {
     border-radius: var(--radius-lg);
     margin-bottom: 2rem;
     box-shadow: var(--shadow-lg);
-    /* backdrop-filter removed for 540Hz scroll performance */
-    transition: var(--trans-normal);
+    transition: border-color 0.2s;
 }
 .confidence-ring-container:hover {
     border-color: var(--glass-border-hover);
@@ -526,12 +525,12 @@ p, span, li, div {
     border-radius: var(--radius-md);
     margin-bottom: 0.75rem;
     border: 1px solid var(--glass-border);
-    transition: var(--trans-bouncy);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s;
+    will-change: transform;
 }
 .tip-item:hover {
-    transform: translateX(5px);
+    transform: translateX(4px);
     border-color: var(--glass-border-hover);
-    box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
 }
 
 /* ── Recipe Cards ── */
@@ -542,12 +541,13 @@ p, span, li, div {
     padding: 2rem;
     margin-bottom: 2rem;
     box-shadow: var(--shadow-md);
-    transition: var(--trans-bouncy);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, box-shadow 0.25s;
+    will-change: transform;
 }
 .recipe-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
     border-color: var(--accent-primary);
-    box-shadow: var(--shadow-lg), var(--shadow-glow);
+    box-shadow: var(--shadow-lg), 0 0 18px rgba(14, 165, 233, 0.2);
 }
 
 .nutrition-pill {
@@ -600,9 +600,9 @@ p, span, li, div {
 }
 
 @keyframes pulse-glow {
-    0% { box-shadow: 0 0 0 0 var(--accent-glow); }
-    70% { box-shadow: 0 0 0 10px rgba(14, 165, 233, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(14, 165, 233, 0); }
+    0%   { opacity: 1; }
+    50%  { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 /* ==========================================================================

@@ -471,7 +471,7 @@ function renderAlternativeRecipes() {
         let coverage = Math.round((recipe.coverage || 0) * 100);
         
         const card = document.createElement('div');
-        card.className = "bento-card rounded-xl p-3 flex gap-2.5 hover:border-amber-500/30 cursor-pointer transition";
+        card.className = "mini-card rounded-xl p-3 flex gap-2.5 hover:border-amber-500/30 cursor-pointer transition";
         card.onclick = () => openRecipeModal(recipe, 'alternative');
         
         card.innerHTML = `
@@ -1007,7 +1007,7 @@ function renderUnlockableRecipes() {
         let missing = recipe.missing_count || 0;
         
         const card = document.createElement('div');
-        card.className = "bento-card rounded-xl p-3 flex gap-2.5 hover:border-cyan-500/30 cursor-pointer transition relative overflow-hidden";
+        card.className = "mini-card rounded-xl p-3 flex gap-2.5 hover:border-cyan-500/30 cursor-pointer transition relative";
         card.onclick = () => openRecipeModal(recipe, 'unlockable');
         
         card.innerHTML = `

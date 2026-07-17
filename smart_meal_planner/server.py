@@ -159,6 +159,28 @@ def generate_plan():
         if alternatives_raw:
             for r in alternatives_raw:
                 matching.append(serialize_recipe(r, extracted_ingredients))
+                
+        # Find unlockable recipes (missing 1-3 ingredients) from the corpus
+        try:
+            unlockable_df = matcher.match(
+                user_ingredients=extracted_ingredients,
+                dietary_filters=dietary_filters,
+                top_n=20,
+                strict_mode=False,
+                indian_focus=indian_focus
+            )
+            
+            if not unlockable_df.empty:
+                unlock_candidates = unlockable_df[
+                    (unlockable_df['missing_count'] > 0) & 
+                    (unlockable_df['missing_count'] <= 3)
+                ]
+                for _, row in unlock_candidates.head(6).iterrows():
+                    ser = serialize_recipe(row, extracted_ingredients)
+                    if ser:
+                        unlockable.append(ser)
+        except Exception as ex:
+            print("Error finding unlockable recipes:", ex)
         
         resp = {
             'success': True,

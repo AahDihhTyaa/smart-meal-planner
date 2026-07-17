@@ -79,62 +79,56 @@
             animation-delay: -12s;
         }
         
+        /* rotate() removed — causes expensive repaint on large elements. translate+scale only for smooth GPU compositing */
         @keyframes liquid-flow {
-            0% { 
-                transform: translate(0, 0) rotate(0deg) scale(1); 
-            }
-            33% { 
-                transform: translate(100px, 50px) rotate(120deg) scale(1.1); 
-            }
-            66% { 
-                transform: translate(-50px, 150px) rotate(240deg) scale(0.9); 
-            }
-            100% { 
-                transform: translate(0, 0) rotate(360deg) scale(1); 
-            }
+            0%   { transform: translate(0, 0) scale(1); }
+            33%  { transform: translate(80px, 40px) scale(1.08); }
+            66%  { transform: translate(-40px, 120px) scale(0.94); }
+            100% { transform: translate(0, 0) scale(1); }
         }
 
-        /* Glassmorphism Card */
+        /* Glassmorphism Card — backdrop-filter removed for compositing performance */
         .bento-card {
-            background: rgba(30, 30, 40, 0.65);
-            backdrop-filter: blur(12px);
+            background: rgba(18, 20, 32, 0.92);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.3); /* Specular highlight */
-            border-left: 1px solid rgba(255, 255, 255, 0.2); /* Specular highlight */
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
             border-radius: 24px;
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* Only GPU-compositable properties in transition */
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            will-change: transform;
             position: relative;
             overflow: hidden;
             z-index: 10;
         }
         
-        /* Inner glow effect for cards */
-        .bento-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.06), transparent 40%);
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        .bento-card:hover::before {
-            opacity: 1;
-        }
+        /* Removed expensive radial-gradient mouse-tracking glow on ::before */
 
         .bento-card:hover {
-            transform: translateY(-5px);
-            background: var(--glass-hover);
-            border-color: var(--glass-border-hover);
-            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.6), 0 0 16px rgba(59, 130, 246, 0.15);
         }
         
         /* Content needs to be above the glow */
         .bento-card > * {
             position: relative;
             z-index: 1;
+        }
+
+        /* Mini card for list items (no overflow clipping or massive radius) */
+        .mini-card {
+            background: rgba(18, 20, 32, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+            will-change: transform;
+        }
+        .mini-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.4), 0 0 12px rgba(59, 130, 246, 0.15);
         }
 
         /* Typography */
@@ -176,51 +170,34 @@
         .btn-glass {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            /* backdrop-filter removed for performance */
-            transition: all 0.3s;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+            will-change: transform;
         }
         .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
             transform: scale(1.02);
         }
         
         .btn-liquid {
             background: linear-gradient(135deg, var(--liquid-1), var(--liquid-2));
             border: none;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
-        }
-        .btn-liquid::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255,255,255,0.2);
-            transform: rotate(45deg);
-            opacity: 0;
-            transition: 0.3s;
+            transition: transform 0.2s, box-shadow 0.2s;
+            will-change: transform;
         }
         .btn-liquid:hover {
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
             transform: translateY(-2px);
-        }
-        .btn-liquid:hover::after {
-            left: 100%;
-            transition: 0.6s ease-in-out;
         }
 
         /* Inputs Glass */
         .input-glass {
             background: rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            /* backdrop-filter removed for performance */
-            transition: all 0.3s;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
         }
         .input-glass:focus {
             background: rgba(0, 0, 0, 0.4);
@@ -234,23 +211,24 @@
             transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.4s;
         }
 
-        /* Micro-interactions & Animations */
+        /* Micro-interactions — box-shadow animation removed from mic (expensive) */
         @keyframes pulse-mic {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0%   { opacity: 1; }
+            50%  { opacity: 0.6; }
+            100% { opacity: 1; }
         }
         .mic-pulse {
-            animation: pulse-mic 2s infinite;
+            animation: pulse-mic 2s ease-in-out infinite;
         }
 
         @keyframes float-bowl {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-8px); }
             100% { transform: translateY(0px); }
         }
         .float-bowl-icon {
             animation: float-bowl 3s ease-in-out infinite;
+            will-change: transform;
         }
 
         /* Skeleton Loaders & Progress Bars */
@@ -532,7 +510,7 @@
 
 
     <!-- Recipe Detail Modal -->
-    <div id="recipe-modal" class="modal fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center opacity-0 invisible">
+    <div id="recipe-modal" class="modal fixed inset-0 z-50 bg-black/80 flex items-center justify-center opacity-0 invisible">
         <div class="bento-card rounded-3xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto m-4 border-white/10 bg-[#161a25]/95 text-white flex flex-col gap-4">
             <div class="flex justify-between items-start pb-4 border-b border-white/5">
                 <div>
