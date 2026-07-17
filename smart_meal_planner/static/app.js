@@ -279,6 +279,7 @@ async function generatePlan() {
 
     const filters = []; // dietary filters could be loaded from settings
     const indianFocus = document.getElementById('indian-focus').checked;
+    const dietGoal = document.getElementById('diet-goal').value;
 
     try {
         const response = await fetch('/api/plan', {
@@ -287,7 +288,8 @@ async function generatePlan() {
             body: JSON.stringify({
                 ingredients: activeIngredients.join(', '),
                 dietary_filters: filters,
-                indian_focus: indianFocus
+                indian_focus: indianFocus,
+                diet_goal: dietGoal
             })
         });
 
@@ -489,7 +491,7 @@ function renderAlternativeRecipes() {
             </div>
             
             <div class="flex-1 min-w-0">
-                <h4 class="text-xs font-semibold text-white truncate leading-tight">${recipe.title}</h4>
+                <h4 class="text-xs font-semibold text-white line-clamp-2 leading-tight">${recipe.title}</h4>
                 <div class="flex gap-2 text-[9px] text-white/40 mt-1">
                     <span>${recipe.calories || 0} kcal</span>
                     <span>•</span>
@@ -782,17 +784,48 @@ function updateChatIntent(intent) {
     }
 }
 
-// --- Text-to-Speech (TTS) ---
+let preferredVoice = null;
+
+function loadVoices() {
+    if (!window.speechSynthesis) return;
+    const voices = window.speechSynthesis.getVoices();
+    // Prioritize natural sounding, premium voices available in modern browsers
+    preferredVoice = voices.find(v => v.name.includes('Google UK English Female')) ||
+                     voices.find(v => v.name.includes('Google US English')) ||
+                     voices.find(v => v.name.includes('Microsoft Zira') || v.name.includes('Microsoft Aria')) ||
+                     voices.find(v => v.name.includes('Samantha') || v.name.includes('Fiona')) ||
+                     voices.find(v => v.lang.startsWith('en-') && v.name.includes('Female')) ||
+                     voices.find(v => v.lang === 'en-US' || v.lang === 'en-GB');
+}
+
+if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
 function speakText(text) {
     if (!window.speechSynthesis) {
         showToast("Speech synthesis not supported in this browser.", "error");
         return;
     }
+    
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = 0.95;
-    window.speechSynthesis.speak(utterance);
+    
+    // Tiny delay ensures previous cancel finishes before new speech starts
+    setTimeout(() => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        if (!preferredVoice) loadVoices();
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+        
+        utterance.lang = 'en-US';
+        utterance.rate = 1.0;   // A natural conversational speed
+        utterance.pitch = 1.05; // Slightly higher pitch for a friendlier "AI Chef" tone
+        
+        window.speechSynthesis.speak(utterance);
+    }, 50);
 }
 
 // --- Recipe Detail Modal ---

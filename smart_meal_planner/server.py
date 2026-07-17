@@ -169,6 +169,7 @@ def generate_plan():
         
         dietary_filters = data.get('dietary_filters', {})
         indian_focus = data.get('indian_focus', False)
+        diet_goal = data.get('diet_goal', 'Balanced')
         
         keys = get_keys()
         ai_live_planner = AILivePlanner(api_key=keys['gemini'] or None, provider="auto")
@@ -178,8 +179,8 @@ def generate_plan():
         alternatives_raw = []
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-            future_day = executor.submit(ai_live_planner.plan_day, extracted_ingredients, dietary_filters, indian_focus)
-            future_alt = executor.submit(ai_live_planner.generate_alternatives, extracted_ingredients, dietary_filters, indian_focus, 7)
+            future_day = executor.submit(ai_live_planner.plan_day, extracted_ingredients, dietary_filters, indian_focus, diet_goal)
+            future_alt = executor.submit(ai_live_planner.generate_alternatives, extracted_ingredients, dietary_filters, indian_focus, 7, diet_goal)
             
             day_plan = future_day.result()
             alternatives_raw = future_alt.result()

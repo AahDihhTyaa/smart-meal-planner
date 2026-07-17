@@ -158,6 +158,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         user_ingredients: List[str],
         dietary_filters: Optional[List[str]] = None,
         indian_focus: bool = False,
+        diet_goal: str = "Balanced",
     ) -> Dict[str, Optional[Dict]]:
         
         dietary_tags = list(dietary_filters) if dietary_filters else []
@@ -174,7 +175,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
                     self.generate_single_recipe,
                     user_ingredients,
                     slot,
-                    "Balanced",
+                    diet_goal,
                     500 if slot == "breakfast" else 700,
                     dietary_tags
                 ): slot for slot in slots
@@ -199,7 +200,8 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
         user_ingredients: List[str],
         dietary_filters: Optional[List[str]] = None,
         indian_focus: bool = False,
-        count: int = 5
+        count: int = 5,
+        diet_goal: str = "Balanced",
     ) -> List[Dict]:
         if not self._available:
             return []
@@ -214,7 +216,7 @@ Return ONLY a valid JSON object with this EXACT structure (no markdown, no expla
 Your ONLY job is to MAKE {count} DIFFERENT recipes using ONLY the user's listed ingredients. Do NOT suggest recipes that require ingredients the user doesn't have.
 
 User's available ingredients: {", ".join(user_ingredients[:25]) if user_ingredients else "Anything"}
-- Diet / goal: Balanced
+- Diet / goal: {diet_goal}
 - Dietary requirements: {tags_str}
 
 STRICT RULES:
