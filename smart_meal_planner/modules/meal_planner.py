@@ -54,7 +54,7 @@ class MealPlanner:
                 user_ingredients=user_ingredients,
                 meal_type=slot,
                 dietary_filters=dietary_filters,
-                top_n=5,
+                top_n=15,
                 exclude_titles=used,
                 strict_mode=True,
                 indian_focus=indian_focus,
@@ -62,7 +62,12 @@ class MealPlanner:
             if candidates.empty:
                 plan[slot] = None
             else:
-                best = candidates.iloc[0]
+                # Only pick recipes that use ONLY recognized ingredients (0 missing)
+                perfect = candidates[candidates['missing_count'] == 0]
+                if not perfect.empty:
+                    best = perfect.iloc[0]
+                else:
+                    best = candidates.iloc[0]
                 plan[slot] = best
                 used.add(best["title"])
 

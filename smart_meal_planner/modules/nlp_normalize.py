@@ -92,8 +92,19 @@ class NLPNormalizer:
         """
         self.fuzzy_threshold = fuzzy_threshold
         self._synonyms: Dict[str, str] = self._load_synonyms()
+        self._inject_colloquial_synonyms()
         self._nlp = self._load_spacy()
         self._lemmatizer = self._load_lemmatizer()
+
+    def _inject_colloquial_synonyms(self):
+        colloquial = {
+            "spuds": "potato", "spud": "potato", "taters": "potato",
+            "veggies": "vegetable", "bubbly": "champagne",
+            "booze": "alcohol", "vino": "wine", "hooch": "alcohol",
+            "shrooms": "mushroom", "shroom": "mushroom",
+            "tomatillo": "tomato", "cilantro": "coriander"
+        }
+        self._synonyms.update(colloquial)
 
     # ── Loading helpers ────────────────────────────────────────────────────────
 
@@ -294,11 +305,6 @@ class NLPNormalizer:
         Returns
         -------
         (quantity_str, remainder)
-
-        Examples
-        --------
-        >>> NLPNormalizer.extract_quantity("2 cups of flour")
-        ('2 cups', 'flour')
         """
         match = _UNIT_PATTERN.match(raw.lower())
         if match:
@@ -306,3 +312,91 @@ class NLPNormalizer:
             remainder = raw[match.end() :].strip()
             return (qty if qty else None, remainder)
         return (None, raw.strip())
+
+    @staticmethod
+    def convert_to_metric(qty_str: str) -> str:
+        """
+        Parses a quantity string (e.g. "0.5 lbs", "1/2 cup") and converts it to metric (g/ml).
+        Returns the converted string.
+        """
+        if not qty_str:
+            return ""
+        
+        # Mapping imperial to metric factors
+        # 1 lb = 453.592g
+        # 1 oz = 28.3495g
+        # 1 cup = 236.588ml (approx 240ml for cooking)
+        # 1 tbsp = 14.7868ml (approx 15ml)
+        # 1 tsp = 4.92892ml (approx 5ml)
+        conversions = {
+            'lb': (453.592, 'g'), 'lbs': (453.592, 'g'), 'pound': (453.592, 'g'), 'pounds': (453.592, 'g'),
+            'oz': (28.3495, 'g'), 'ounce': (28.3495, 'g'), 'ounces': (28.3495, 'g'),
+            'cup': (240, 'ml'), 'cups': (240, 'ml'),
+            'tbsp': (15, 'ml'), 'tablespoon': (15, 'ml'), 'tablespoons': (15, 'ml'),
+            'tsp': (5, 'ml'), 'teaspoon': (5, 'ml'), 'teaspoons': (5, 'ml')
+        }
+        
+        qty_str = qty_str.lower().strip()
+        num_part = ""
+        unit_part = ""
+        
+        # Separate numbers/fractions from words
+        parts = qty_str.split()
+        if not parts:
+            return qty_str
+            
+        unit_part = parts[-1]
+        num_str = " ".join(parts[:-1]) if len(parts) > 1 else parts[0]
+        
+        # If no recognizable unit, just return original
+        if unit_part not in conversions:
+            return qty_str
+            
+        # Parse number (handle fractions and decimals)
+        val = 0.0
+        try:
+            if '/' in num_str:
+                if ' ' in num_str:
+                    whole, frac = num_str.split(' ')
+                    num, den = frac.split('/')
+                    val = float(whole) + (float(num) / float(den))
+                else:
+                    num, den = num_str.split('/')
+                    val = float(num) / float(den)
+            else:
+                # Handle unicode fractions roughly if needed, else standard float
+                unicode_fracs = {'½': 0.5, '⅓': 0.333, '⅔': 0.667, '¼': 0.25, '¾': 0.75, '⅛': 0.125, '⅜': 0.375, '⅝': 0.625, '⅞': 0.875}
+                if num_str in unicode_fracs:
+                    val = unicode_fracs[num_str]
+                else:
+                    val = float(num_str)
+        except ValueError:
+            return qty_str # Return original if math fails
+            
+        factor, target_unit = conversions[unit_part]
+        metric_val = val * factor
+        
+        # Round nicely
+        if target_unit == 'g':
+            metric_val = round(metric_val)
+        else:
+            metric_val = round(metric_val, 1)
+            
+        return f"{metric_val}{target_unit}"
+        
+    def normalize_with_quantity(self, raw: str) -> Optional[Dict[str, str]]:
+        """
+        Extracts quantity, converts to metric, and returns dict with canonical name and metric quantity.
+        """
+        qty_str, remainder = self.extract_quantity(raw)
+        canonical = self.normalize(remainder) if remainder else self.normalize(raw)
+        
+        if not canonical:
+            return None
+            
+        metric_qty = self.convert_to_metric(qty_str) if qty_str else ""
+        return {
+            "canonical": canonical,
+            "metric_quantity": metric_qty,
+            "original_quantity": qty_str or ""
+        }

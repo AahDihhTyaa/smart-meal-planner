@@ -169,6 +169,22 @@ _SEASONAL_SWAPS: Dict[str, Dict[str, str]] = {
     },
 }
 
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+# AUTOMATED SUBSTITUTION MATRIX
+# ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+_STANDARD_SUBSTITUTIONS: Dict[str, str] = {
+    "buttermilk": "milk + 1 tbsp lemon juice",
+    "soy_sauce": "tamari or coconut aminos",
+    "egg": "1/4 cup applesauce or 1 flax egg",
+    "heavy_cream": "milk + butter",
+    "sour_cream": "plain greek yogurt",
+    "baking_powder": "1/4 tsp baking soda + 1/2 tsp cream of tartar",
+    "breadcrumbs": "crushed crackers or oats",
+    "brown_sugar": "white sugar + molasses",
+    "chicken_broth": "vegetable broth or water + bouillon",
+    "lemon_juice": "lime juice or white vinegar",
+}
+
 
 class SeasonalAdvisor:
     """Provides seasonal availability info and swap suggestions."""
@@ -605,3 +621,16 @@ class RecommendationEngine:
             "seasonal_swaps": seasonal,
             "current_season": season,
         }
+
+    def get_substitutions(self, missing_ingredients: List[str]) -> List[Dict]:
+        """
+        Looks up missing ingredients in the standard substitution matrix.
+        """
+        subs = []
+        for ing in missing_ingredients:
+            clean = ing.replace('_', ' ').lower().strip()
+            if clean in _STANDARD_SUBSTITUTIONS:
+                subs.append({"ingredient": clean, "substitute": _STANDARD_SUBSTITUTIONS[clean]})
+            elif ing in _STANDARD_SUBSTITUTIONS:
+                subs.append({"ingredient": clean, "substitute": _STANDARD_SUBSTITUTIONS[ing]})
+        return subs

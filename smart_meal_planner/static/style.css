@@ -86,7 +86,7 @@ header[data-testid="stHeader"] {
 /* ── Sidebar Customization ── */
 [data-testid="stSidebar"] {
     background: rgba(17, 24, 39, 0.7) !important;
-    backdrop-filter: blur(15px);
+    
     border-right: 1px solid var(--glass-border) !important;
     padding-top: 2rem !important;
 }
@@ -374,7 +374,7 @@ p, span, li, div {
 
 .hero-emoji {
     font-size: 4rem;
-    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+
 }
 
 /* ── Confidence Rings ── */
@@ -417,7 +417,7 @@ p, span, li, div {
     stroke: var(--accent-primary);
     stroke-width: 8;
     stroke-linecap: round;
-    filter: drop-shadow(0 0 10px var(--accent-glow));
+
     animation: stroke-draw 1.5s var(--trans-bouncy) forwards;
 }
 
@@ -648,7 +648,7 @@ p, span, li, div {
     padding: 3rem;
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-lg), 0 0 50px rgba(14, 165, 233, 0.15);
-    backdrop-filter: blur(12px);
+    
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -739,7 +739,7 @@ p, span, li, div {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(10, 15, 30, 0.85);
-    backdrop-filter: blur(6px);
+    
     z-index: 9998;
     animation: fade-in 0.4s ease-out forwards;
 }
@@ -814,7 +814,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], .main {
     border-radius: 99px;
     font-size: 0.85rem;
     font-weight: 500;
-    backdrop-filter: blur(4px);
+    
     transition: var(--trans-normal);
 }
 
@@ -934,7 +934,7 @@ div[data-testid="stTabContent"] {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(10, 15, 30, 0.85);
-    backdrop-filter: blur(6px);
+    
     z-index: 9998;
     animation: fade-in 0.4s ease-out forwards;
 }
@@ -1009,7 +1009,7 @@ html, body, .stApp, [data-testid="stAppViewContainer"], .main {
     border-radius: 99px;
     font-size: 0.85rem;
     font-weight: 500;
-    backdrop-filter: blur(4px);
+    
     transition: var(--trans-normal);
 }
 
@@ -1136,7 +1136,7 @@ div[data-testid="stTabContent"] {
 body, .stApp, [data-testid="stAppViewContainer"], .main {
     background: linear-gradient(-45deg, #0b0f19, #0f172a, #1e1b4b, #0b0f19) !important;
     background-size: 400% 400% !important;
-    animation: gradientBG 15s ease infinite !important;
+    /* gradientBG animation removed for 144Hz buttery smooth scrolling performance */
 }
 
 @keyframes gradientBG {
@@ -1145,14 +1145,13 @@ body, .stApp, [data-testid="stAppViewContainer"], .main {
     100% { background-position: 0% 50%; }
 }
 
-/* Glassmorphism & Hover Animations */
+/* Glassmorphism & Hover Animations (Optimized for 144Hz) */
 .recipe-card, .hero-banner, .confidence-ring-container, .kitchen-tips-card, [data-testid="stChatMessage"], [data-testid="stChatInput"] {
-    backdrop-filter: blur(16px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-    background: rgba(17, 24, 39, 0.5) !important;
+    background: rgba(17, 24, 39, 0.95) !important;
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    will-change: transform;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.4s, border-color 0.4s, box-shadow 0.4s !important;
 }
 
 .recipe-card:hover, .kitchen-tips-card:hover {

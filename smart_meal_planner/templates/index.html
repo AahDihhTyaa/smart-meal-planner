@@ -6,8 +6,8 @@
     <title>Smart Meal Planner — AI Bento Kitchen</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Fraunces (Editorial Serif), Inter (Clean Sans), JetBrains Mono (Technical Monospace) -->
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Plus Jakarta Sans, Inter (Clean Sans), JetBrains Mono (Technical Monospace) -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
@@ -27,7 +27,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-light);
             min-height: 100vh;
@@ -94,10 +94,11 @@
             }
         }
 
-        /* Glassmorphism Card (The "Glass" part) */
+        /* Glassmorphism Card */
         .bento-card {
-            background: rgba(30, 40, 50, 0.8); /* Solid semi-transparent background to replace blur */
-            border: 1px solid var(--glass-border);
+            background: rgba(30, 30, 40, 0.65);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-top: 1px solid rgba(255, 255, 255, 0.3); /* Specular highlight */
             border-left: 1px solid rgba(255, 255, 255, 0.2); /* Specular highlight */
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255,255,255,0.05);
@@ -138,7 +139,8 @@
 
         /* Typography */
         .serif-title {
-            font-family: 'Fraunces', serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
             letter-spacing: -0.02em;
         }
         
@@ -181,6 +183,7 @@
             background: rgba(255, 255, 255, 0.15);
             border-color: rgba(255, 255, 255, 0.3);
             box-shadow: 0 0 15px rgba(255,255,255,0.1);
+            transform: scale(1.02);
         }
         
         .btn-liquid {
@@ -230,13 +233,63 @@
         .modal {
             transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.4s;
         }
+
+        /* Micro-interactions & Animations */
+        @keyframes pulse-mic {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .mic-pulse {
+            animation: pulse-mic 2s infinite;
+        }
+
+        @keyframes float-bowl {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .float-bowl-icon {
+            animation: float-bowl 3s ease-in-out infinite;
+        }
+
+        /* Skeleton Loaders & Progress Bars */
+        .skeleton-shimmer {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .progress-bar {
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Scrollbar for Pantry Container */
+        #pantry-chips-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        #pantry-chips-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        #pantry-chips-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="p-6 md:p-8 flex flex-col items-center">
-    <!-- background blobs -->
-    <div class="liquid-blob liquid-blob-1"></div>
-    <div class="liquid-blob liquid-blob-2"></div>
-    <div class="liquid-blob liquid-blob-3"></div>
+    <!-- background blobs (fixed wrapper prevents excessive scrolling) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none" style="z-index: -10;">
+        <div class="liquid-blob liquid-blob-1"></div>
+        <div class="liquid-blob liquid-blob-2"></div>
+        <div class="liquid-blob liquid-blob-3"></div>
+    </div>
 
     <div class="w-full max-w-7xl flex flex-col gap-6 h-full min-h-[92vh]">
         <!-- Top Navigation Header -->
@@ -248,9 +301,7 @@
                     <p class="text-xs text-white/50 tracking-wider uppercase font-semibold">AI Bento Kitchen Dashboard</p>
                 </div>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="/viz" class="btn-glass px-4 py-2 text-xs font-semibold tracking-wider rounded-lg transition" title="Architecture Visualizer">3D Visualizer 🧭</a>
-                <button onclick="openSettings()" class="btn-glass w-10 h-10 flex items-center justify-center rounded-lg transition" title="Configuration Settings">⚙️</button>
+            <div class="flex gap-3 ml-auto">
             </div>
         </header>
 
@@ -275,7 +326,7 @@
 
                     <div class="flex gap-3 items-center">
                         <button id="process-photo-btn" onclick="processPhoto()" class="flex-1 py-3 text-xs tracking-wider font-bold uppercase rounded-xl bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white shadow-lg transition duration-200" disabled>Process Photo 🤖</button>
-                        <button id="mic-toggle-btn" onclick="toggleVoiceInput()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-400 transition hover:scale-105 active:scale-95" title="Speech to Text Command">
+                        <button id="mic-toggle-btn" onclick="toggleVoiceInput()" class="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-cyan-400 transition hover:scale-105 active:scale-95 mic-pulse" title="Speech to Text Command">
                             <span class="text-lg">🎙️</span>
                         </button>
                     </div>
@@ -340,7 +391,7 @@
                 <div id="recipe-list-container" class="flex-1 overflow-y-auto pr-1 flex flex-col gap-4">
                     <!-- Dynamic Recipe Cards -->
                     <div class="m-auto text-center py-12 px-4 flex flex-col items-center gap-3">
-                        <span class="text-5xl animate-bounce">🥗</span>
+                        <span class="text-5xl float-bowl-icon inline-block">🥗</span>
                         <h3 class="serif-title text-lg font-semibold text-white/70">Your kitchen is quiet</h3>
                         <p class="text-xs text-white/40 max-w-xs">Fill up the normalizer on the left and tap "Generate" to unlock optimized custom recipe recommendations.</p>
                     </div>
@@ -389,7 +440,7 @@
                         </div>
                         <!-- 3D style progress bar -->
                         <div class="w-full bg-white/5 h-3 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                            <div id="budget-progress" class="bg-gradient-to-r from-amber-500 to-amber-600 h-full w-0 transition-all duration-500"></div>
+                            <div id="budget-progress" class="bg-gradient-to-r from-amber-500 to-amber-600 h-full w-0 progress-bar"></div>
                         </div>
                         <div class="flex justify-between items-center pt-1">
                             <label for="smart-swap-toggle" class="text-[11px] text-white/60 font-semibold cursor-pointer">Enable Cheap Swaps</label>
@@ -408,7 +459,7 @@
                                 <span id="nutri-cals">0 kcal</span>
                             </div>
                             <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <div id="nutri-cals-bar" class="bg-cyan-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
+                                <div id="nutri-cals-bar" class="bg-cyan-500 h-full w-0 progress-bar shadow-[0_0_8px_rgba(6,182,212,0.5)]"></div>
                             </div>
                         </div>
 
@@ -419,7 +470,7 @@
                                 <span id="nutri-protein">0g</span>
                             </div>
                             <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <div id="nutri-protein-bar" class="bg-emerald-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                                <div id="nutri-protein-bar" class="bg-emerald-500 h-full w-0 progress-bar shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
                             </div>
                         </div>
 
@@ -430,7 +481,7 @@
                                 <span id="nutri-carbs">0g</span>
                             </div>
                             <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <div id="nutri-carbs-bar" class="bg-amber-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
+                                <div id="nutri-carbs-bar" class="bg-amber-500 h-full w-0 progress-bar shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div>
                             </div>
                         </div>
 
@@ -441,7 +492,7 @@
                                 <span id="nutri-fat">0g</span>
                             </div>
                             <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
-                                <div id="nutri-fat-bar" class="bg-pink-500 h-full w-0 transition-all duration-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
+                                <div id="nutri-fat-bar" class="bg-pink-500 h-full w-0 progress-bar shadow-[0_0_8px_rgba(244,63,94,0.5)]"></div>
                             </div>
                         </div>
                     </div>
@@ -479,28 +530,6 @@
         </main>
     </div>
 
-    <!-- Configuration Modal -->
-    <div id="settings-modal" class="modal fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center opacity-0 invisible">
-        <div class="bento-card rounded-3xl p-6 w-full max-w-md m-4 border-white/10">
-            <div class="flex justify-between items-center pb-4 border-b border-white/5 mb-4">
-                <h3 class="serif-title text-lg font-bold text-white">API Keys Configuration</h3>
-                <button onclick="closeSettings()" class="text-2xl text-white/40 hover:text-white">&times;</button>
-            </div>
-            <div class="space-y-4">
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-white/60">Gemini API Key (Vision & Intent)</label>
-                    <input type="password" id="gemini-key" placeholder="AI Studio key..." class="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50">
-                </div>
-                <div class="flex flex-col gap-1.5">
-                    <label class="text-xs font-semibold text-white/60">Groq API Key (Optional Whisper Fallback)</label>
-                    <input type="password" id="groq-key" placeholder="gsk_..." class="bg-black/30 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-500/50">
-                </div>
-                <button onclick="saveSettings()" class="w-full py-3 bg-cyan-600 hover:bg-cyan-500 font-bold uppercase text-xs tracking-wider rounded-xl transition active:scale-95 text-white">
-                    Save Configuration
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Recipe Detail Modal -->
     <div id="recipe-modal" class="modal fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center opacity-0 invisible">
@@ -567,9 +596,23 @@
     </div>
 
     <!-- Loader Screen Overlay -->
-    <div id="loading-overlay" class="fixed inset-0 bg-[#0B0F19]/80 backdrop-blur-md flex flex-col items-center justify-center gap-4 z-[9999] opacity-0 invisible transition-all duration-300">
-        <div class="w-16 h-16 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
-        <p id="loading-message" class="serif-title text-lg text-white/80 font-medium tracking-wide">Cooking up your customized recipe options...</p>
+    <div id="loading-overlay" class="fixed inset-0 bg-[#0B0F19]/95 flex flex-col items-center justify-center gap-8 z-[9999] opacity-0 invisible pointer-events-none transition-opacity duration-500 will-change-[opacity]">
+        
+        <!-- Premium Smooth Custom Spinner -->
+        <div class="relative w-28 h-28 flex items-center justify-center">
+            <!-- Outer Ring -->
+            <div class="absolute inset-0 border-[3px] border-amber-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-[3px] border-amber-500 rounded-full border-t-transparent animate-[spin_1s_cubic-bezier(0.55,0.055,0.675,0.19)_infinite]"></div>
+            
+            <!-- Middle Ring -->
+            <div class="absolute inset-3 border-[3px] border-cyan-500/10 rounded-full"></div>
+            <div class="absolute inset-3 border-[3px] border-cyan-400 rounded-full border-b-transparent animate-[spin_1.5s_cubic-bezier(0.68,-0.55,0.265,1.55)_infinite_reverse]"></div>
+            
+            <!-- Inner Glowing Core -->
+            <div class="w-6 h-6 bg-gradient-to-tr from-amber-400 to-cyan-400 rounded-full animate-pulse"></div>
+        </div>
+
+        <p id="loading-message" class="serif-title text-xl text-white/90 font-medium tracking-wide animate-pulse">Cooking up your customized recipe options...</p>
     </div>
 
     <script src="/static/app.js"></script>

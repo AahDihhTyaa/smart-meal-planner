@@ -115,6 +115,11 @@ class VisionInputModule:
         gemini_key = api_key or os.getenv("GEMINI_API_KEY", "")
         openai_key = os.getenv("OPENAI_API_KEY", "")
 
+        # Sanitize Gemini API Key
+        if gemini_key and not gemini_key.startswith("AIzaSy"):
+            logger.warning("Ignoring invalid Gemini API key format (must start with AIzaSy).")
+            gemini_key = ""
+
         # Force provider logic
         if provider == "openai" and openai_key:
             self._init_openai(openai_key)
@@ -124,12 +129,12 @@ class VisionInputModule:
             self._init_gemini(gemini_key)
         else:
             # Auto fallback logic
-            if groq_key:
-                self._init_groq(groq_key)
+            if gemini_key:
+                self._init_gemini(gemini_key)
             if not self._available and openai_key:
                 self._init_openai(openai_key)
-            if not self._available and gemini_key:
-                self._init_gemini(gemini_key)
+            if not self._available and groq_key:
+                self._init_groq(groq_key)
 
     def _init_openai(self, key: str) -> None:
         try:

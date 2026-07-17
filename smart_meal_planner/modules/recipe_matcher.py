@@ -41,7 +41,7 @@ class RecipeMatcher:
         alpha: float = 0.15,         # TF-IDF weight
         beta: float = 0.85,          # Coverage weight (dominant signal)
         gamma: float = 0.05,         # Dietary tag bonus
-        min_coverage: float = 0.50,  # Lowered: more recipes surface, still relevant
+        min_coverage: float = 0.35,  # Lowered: more recipes surface, still relevant
     ):
         self.alpha = alpha
         self.beta = beta

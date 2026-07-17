@@ -47,6 +47,11 @@ class ChatbotIntentParser:
         gemini_key = api_key or os.getenv("GEMINI_API_KEY", "")
         openai_key = os.getenv("OPENAI_API_KEY", "")
 
+        # Sanitize Gemini API Key
+        if gemini_key and not gemini_key.startswith("AIzaSy"):
+            logger.warning("Ignoring invalid Gemini API key format (must start with AIzaSy).")
+            gemini_key = ""
+
         # Force provider logic
         if provider == "openai" and openai_key:
             self._init_openai(openai_key)
@@ -212,7 +217,7 @@ class ChatbotIntentParser:
             logger.error(f"Chat error: {e}")
             return "I ran into a small issue processing that request in my kitchen. Could you ask again?"
 
-    def build_context_aware_system_prompt(self, user_ingredients: list, active_plan: dict, diet_profile: dict, seasonal_info: str) -> str:
+    def build_context_aware_system_prompt(self, user_ingredients: list, active_plan: dict, diet_profile: dict, seasonal_info: str, active_recipe: dict = None, current_step: int = 0) -> str:
         """
         Builds a rich system prompt injecting current application state.
         """
@@ -226,6 +231,13 @@ class ChatbotIntentParser:
         goal = diet_profile.get("goal", "Balanced")
         calorie_target = diet_profile.get("target_calories", 2000)
         
+        active_recipe_str = "None"
+        if active_recipe:
+            title = active_recipe.get("title", "Unknown")
+            ingreds = active_recipe.get("ingredients", "").replace("|", ", ")
+            instructions = active_recipe.get("instructions", "")
+            active_recipe_str = f"Title: {title}\nIngredients: {ingreds}\nInstructions: {instructions}\nUser is currently on Step: {current_step}"
+            
         return f"""You are an expert, Michelin-star AI Chef assisting a user with their Smart Meal Planner.
         
 CURRENT CONTEXT:
@@ -235,6 +247,8 @@ CURRENT CONTEXT:
 - Dietary Goal: {goal}
 - Daily Calorie Target: {calorie_target} kcal
 - Seasonal Context: {seasonal_info}
+- Active Recipe (Currently Cooking):
+{active_recipe_str}
 
 RULES FOR YOUR RESPONSES:
 1. You MUST factor in the user's current pantry ingredients when suggesting what to cook.
@@ -242,6 +256,7 @@ RULES FOR YOUR RESPONSES:
 3. If they ask about nutrition, reference their dietary goal ({goal}) and calorie target.
 4. Keep responses conversational, highly professional, culinary-focused, and concise (under 200 words).
 5. Suggest seasonal swaps or batch-cooking opportunities if relevant.
+6. If an active recipe is provided, use its ingredients, instructions, and current step to answer questions like "How much do I need?" or "What's the next step?".
 """
 
     def generate_smart_suggestions(self, user_ingredients: list, active_plan: dict) -> list:

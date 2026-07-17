@@ -17,44 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
     initDragAndDrop();
     initSpeechRecognition();
     
-    // Check if there are saved ingredients or load empty state
+function loadSettings() {
+    const indianFocus = localStorage.getItem('indianFocus') === 'true';
+    const focusEl = document.getElementById('indian-focus');
+    if (focusEl) {
+        focusEl.checked = indianFocus;
+        focusEl.addEventListener('change', (e) => {
+            localStorage.setItem('indianFocus', e.target.checked);
+        });
+    }
+}
+
+// Check if there are saved ingredients or load empty state
     updatePantryUI();
 });
 
-// --- Settings & Auth Configuration ---
-function openSettings() {
-    const modal = document.getElementById('settings-modal');
-    modal.classList.remove('invisible');
-    modal.classList.add('opacity-100');
-}
-
-function closeSettings() {
-    const modal = document.getElementById('settings-modal');
-    modal.classList.remove('opacity-100');
-    modal.classList.add('invisible');
-}
-
-function saveSettings() {
-    const gemini = document.getElementById('gemini-key').value.trim();
-    const groq = document.getElementById('groq-key').value.trim();
-    localStorage.setItem('smp_gemini_key', gemini);
-    localStorage.setItem('smp_groq_key', groq);
-    closeSettings();
-    showToast("Settings saved successfully!", "success");
-}
-
-function loadSettings() {
-    const gemini = localStorage.getItem('smp_gemini_key') || '';
-    const groq = localStorage.getItem('smp_groq_key') || '';
-    document.getElementById('gemini-key').value = gemini;
-    document.getElementById('groq-key').value = groq;
-}
-
 function getAuthHeaders() {
     return {
-        'Content-Type': 'application/json',
-        'X-Gemini-Key': localStorage.getItem('smp_gemini_key') || '',
-        'X-Groq-Key': localStorage.getItem('smp_groq_key') || ''
+        'Content-Type': 'application/json'
     };
 }
 
@@ -154,6 +134,11 @@ async function processPhoto() {
             
             // Clear photo zone
             resetDropZone();
+
+            // Auto-trigger plan generation
+            if (activeIngredients.length > 0) {
+                generatePlan();
+            }
         } else {
             showToast(data.error || "Vision analysis failed.", "error");
         }
@@ -404,8 +389,11 @@ function renderRecipePlan() {
             });
 
             const card = document.createElement('div');
-            card.className = "bento-card rounded-2xl p-4 flex gap-4 hover:border-amber-500/40 cursor-pointer";
-            card.onclick = () => openRecipeModal(recipe, slot);
+            card.className = "bento-card rounded-2xl p-4 flex gap-4 hover:border-amber-500/40 cursor-pointer relative group";
+            card.onclick = (e) => {
+                if (e.target.closest('.refresh-btn')) return;
+                openRecipeModal(recipe, slot);
+            };
             
             // Radial Progress Circle logic
             const dashArray = 125.6;
@@ -436,7 +424,12 @@ function renderRecipePlan() {
                     <div>
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold tracking-wider uppercase text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">${slot}</span>
-                            <span class="text-[10px] font-semibold text-white/40">${recipe.prep_time_min || 20}m | Diff: ${recipe.difficulty || 2}/5</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-semibold text-white/40">${recipe.prep_time_min || 20}m | Diff: ${recipe.difficulty || 2}/5</span>
+                                <button onclick="refreshRecipeSlot('${slot}')" class="refresh-btn text-white/50 hover:text-white transition p-1 hover:bg-white/10 rounded-full" title="Swap Recipe">
+                                    <span class="text-xs">🔄</span>
+                                </button>
+                            </div>
                         </div>
                         <h3 class="serif-title text-md font-semibold text-white mt-1.5 leading-snug">${recipe.title}</h3>
                         <p class="text-xs text-white/60 line-clamp-2 mt-1">${recipe.instructions || ''}</p>
@@ -869,6 +862,30 @@ function swapActiveRecipe(targetSlot) {
     closeRecipeModal();
 }
 
+window.refreshRecipeSlot = function(slot) {
+    if (!alternativeRecipes || alternativeRecipes.length === 0) {
+        showToast("No alternatives available. Generate more!", "warning");
+        return;
+    }
+    const activePlan = (viewMode === 'daily') ? dayPlan : (weekPlan[selectedWeeklyDay] || {});
+    const previousRecipe = activePlan[slot];
+    
+    // Pick a random alternative
+    const altIndex = Math.floor(Math.random() * alternativeRecipes.length);
+    const newRecipe = alternativeRecipes[altIndex];
+    
+    // Swap
+    activePlan[slot] = newRecipe;
+    alternativeRecipes.splice(altIndex, 1);
+    if (previousRecipe) {
+        alternativeRecipes.push(previousRecipe);
+    }
+    
+    renderRecipePlan();
+    renderAlternativeRecipes();
+    showToast(`Refreshed ${slot}!`, "success");
+}
+
 function readRecipeText() {
     if (!activeModalRecipe) return;
     const text = `${activeModalRecipe.title}. Ingredients involved: ${activeModalRecipe.ingredients.replace(/\|/g, ', ')}. Instructions: ${activeModalRecipe.instructions}`;
@@ -876,16 +893,68 @@ function readRecipeText() {
 }
 
 // --- Utilities ---
+function triggerSkeletonLoaders() {
+    const recipeContainer = document.getElementById('recipe-list-container');
+    if (recipeContainer) {
+        recipeContainer.innerHTML = `
+            <div class="flex flex-col gap-4 w-full h-full p-2">
+                <div class="skeleton-shimmer w-full h-24"></div>
+                <div class="skeleton-shimmer w-full h-24"></div>
+                <div class="skeleton-shimmer w-full h-24"></div>
+            </div>
+        `;
+    }
+    
+    const bars = ['cals', 'protein', 'carbs', 'fat'];
+    bars.forEach(b => {
+        const bar = document.getElementById(`nutri-${b}-bar`);
+        if (bar) bar.style.width = '0%';
+    });
+}
+
+let loaderTimeout;
+let messageInterval;
 function showLoader(show, message = "") {
     const loader = document.getElementById('loading-overlay');
     const msg = document.getElementById('loading-message');
+    
+    if (loaderTimeout) {
+        clearTimeout(loaderTimeout);
+        loaderTimeout = null;
+    }
+    if (messageInterval) {
+        clearInterval(messageInterval);
+        messageInterval = null;
+    }
+    
     if (show) {
+        triggerSkeletonLoaders();
         msg.textContent = message || "Cooking up choices...";
-        loader.classList.remove('invisible');
-        loader.classList.add('opacity-100');
+        
+        if (message.includes("AI Chef")) {
+            const aiMessages = [
+                "Consulting the Michelin-star Chef...",
+                "Selecting the freshest ingredients...",
+                "Designing a balanced diet...",
+                "Drafting your personalized recipes...",
+                "Almost ready, plating your meals..."
+            ];
+            let msgIdx = 0;
+            messageInterval = setInterval(() => {
+                msg.textContent = aiMessages[msgIdx % aiMessages.length];
+                msgIdx++;
+            }, 2500);
+        }
+        
+        loader.classList.remove('invisible', 'pointer-events-none');
+        // Small delay to ensure display state triggers CSS transition
+        setTimeout(() => loader.classList.add('opacity-100'), 10);
     } else {
         loader.classList.remove('opacity-100');
-        loader.classList.add('invisible');
+        loader.classList.add('pointer-events-none');
+        loaderTimeout = setTimeout(() => {
+            loader.classList.add('invisible');
+        }, 500);
     }
 }
 
